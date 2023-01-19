@@ -8,8 +8,8 @@ const commandHtml = document.querySelector('.command')
 /* 
     api所需参数
 */
-const appid = 'XXXX';
-const key = 'XXXX';
+const appid = '替换为你的APPID'; // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+const key = '替换为你的秘钥'; // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
 let salt = (new Date).getTime();
 let from = 'auto';
 let to = 'zh';
