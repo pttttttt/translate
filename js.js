@@ -10,6 +10,12 @@ const commandHtml = document.querySelector('.command')
 */
 const appid = '替换为你的APPID'; // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
 const key = '替换为你的秘钥'; // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+if (appid === '替换为你的APPID' || key === '替换为你的秘钥') {
+    target.innerText = '无法使用!'
+    target.style.color = 'red'
+    dst.innerText = '请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!'
+    dst.style.color = 'red'
+}
 let salt = (new Date).getTime();
 let from = 'auto';
 let to = 'zh';
@@ -205,6 +211,13 @@ addEventListener('mouseup', e => {
 })
 addEventListener('keyup', e => {
     if (e.key === 'Enter') {
+        if (appid === '替换为你的APPID' || key === '替换为你的秘钥') {
+            target.innerText = '无法使用!'
+            target.style.color = 'red'
+            dst.innerText = '请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!'
+            dst.style.color = 'red'
+            return
+        }
         // 去除输入文本的空格
         query = input.value.replace(/^\s*|\s*$/g,"")
         // 匹配命令 -s 后的参数
