@@ -4,7 +4,7 @@
 本网页是使用原生js写的一个极其简单的翻译网页
 核心是调用了百度翻译提供的免费api
 所以需要你自己去百度翻译注册并申请一个属于自己的id和秘钥
-具体申请方法去百度或者b站搜
+具体申请方法请去百度或者b站搜
 
 账号申请好后找到 app id 和 秘钥
 查看地址：https://fanyi-api.baidu.com/api/trans/product/desktop
