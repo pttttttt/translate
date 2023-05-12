@@ -29,6 +29,45 @@ input, div {
     font-weight: 100;
 }
 
+.box {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: space-between;
+}
+
+.box .left, .box .right {
+    width: 45%;
+}
+
+.box .left>div>ul {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.box .left {
+    padding-top: 100px;
+}
+
+.box .left>div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.box .left>div>ul>li {
+    list-style: none;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .show {
     display: none;
 }
@@ -38,7 +77,7 @@ input, div {
     flex-wrap: wrap;
     justify-content: space-between;
     width: 500px;
-    margin-top: 100px;
+    padding-top: 100px;
 }
 
 .languages div {
@@ -58,7 +97,7 @@ input, div {
     flex-wrap: wrap;
     justify-content: space-between;
     width: 500px;
-    margin-top: 100px;
+    padding-top: 100px;
 }
 
 .help .command div {
