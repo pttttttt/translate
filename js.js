@@ -11,8 +11,14 @@ const container = document.querySelector('.left')
   api所需参数
 */
 
-const appid = '20221219001502307'
-const key = 'NGCed1L42z6L8ciJs0rM'
+const appid = '替换为你的APPID' // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+const key = '替换为你的秘钥' // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+if (appid === '替换为你的APPID' || key === '替换为你的秘钥') {
+  target.innerText = '无法使用!'
+  target.style.color = 'red'
+  dst.innerText = '请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!'
+  dst.style.color = 'red'
+}
 let salt = 123
 // (new Date).getTime()
 let from = 'auto'
