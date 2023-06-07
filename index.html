@@ -8,33 +8,14 @@
     <input type="text">
     <div class="target">目标语言: 自动</div>
     <div class="dst" title="单击鼠标右键将文本复制到剪切板">按下回车键翻译或执行命令 <br>使用 -hlep 查看所有命令</div>
-    <div class="box">
-        <div class="left">
-            <!-- <div>
-                <span>-h [参数] [后缀]</span>
-                <ul>
-                    <li><span>命令</span><span>-help -h</span></li>
-                    <li><span>参数</span><span>所有命令</span></li>
-                    <li><span>后缀</span><span>o- D- l-</span></li>
-                </ul>
-            </div> -->
-        </div>
-        <div class="right">
-            <div class="show">
-                <div class="languages"></div>
-            </div>
-            <div class="help">
-                <div class="command"></div>
-            </div>
-        </div>
-    </div>
-    
+    <div class="show-container"></div>
+
     <script src="http://apps.bdimg.com/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="./md5.js"></script>
     <script src="./js.js"></script>
     <script>
         // var h = window.innerHeight, w = window.innerWidth;
-        // 禁用右键 （防止右键查看源代码）  
+        // // 禁用右键 （防止右键查看源代码）  
         // window.oncontextmenu =  () => { return false }
         // // 在本网页的任何键盘敲击事件都是无效操作 （防止F12和shift+ctrl+i调起开发者工具）  
         // window.onkeydown = window.onkeyup = window.onkeypress = function () {
@@ -45,12 +26,12 @@
         // window.onresize = function () {
         //     if (h != window.innerHeight || w != window.innerWidth) {
         //         window.close();
-        //         window.location = "about:blank";
+        //         window.location.href = "https://www.baidu.com/?tn=88093251_28_hao_pg";
         //     }
         // }
 
-        // document.onkeydown = function (e) {
         //     e = window.event || e;
+        // document.onkeydown = function (e) {
         //     var keycode = e.keyCode || e.which;
         //     if (e.ctrlKey || e.altKey || e.shiftKey
         //         || keycode >= 112 && keycode <= 123) {
@@ -122,5 +103,4 @@
 //     }
 // });
     </script>
-<!-- 最后一次改动: 2023.1.9 -->
 </body>

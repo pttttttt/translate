@@ -1,3 +1,12 @@
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+ul>li {
+    list-style: none;
+}
+
 body {
     background: black;
 }
@@ -6,7 +15,7 @@ input {
     background-color: transparent;
     border: none;
     color: white;
-    width: 1000px;
+    width: 100%;
 }
 
 input:focus {
@@ -20,90 +29,60 @@ input, div {
 .target {
     color: #5e9955;
     user-select: none;
-    /* font-size: 12px; */
 }
 
 .dst {
     display: inline-block;
-    /* font-family: MicrosoftYaHei; */
     font-weight: 100;
 }
 
-.box {
-    width: 80%;
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    justify-content: space-between;
+.show-container {
+    font-size: 14px;
 }
 
-.box .left, .box .right {
-    width: 45%;
+.show-container>div {
+    margin-top: 20px;
 }
 
-.box .left>div>ul {
-    margin: 0;
-    padding: 0;
-    width: 100%;
+.show-container .table,
+.show-container .item {
+    width: 36%;
 }
 
-.box .left {
-    padding-top: 100px;
+.show-container .table>div:hover,
+.show-container .item>ul>li:hover {
+    transition: all .2s;
 }
 
-.box .left>div {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
+.show-container .table>div:hover,
+.show-container .item>ul>li:hover {
+    color: #1a73e8;
 }
 
-.box .left>div>ul>li {
-    list-style: none;
-    width: 100%;
+.show-container .table>div {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
 }
 
-.show {
-    display: none;
+.show-container .item {
+    text-align: center;
 }
 
-.languages {
+.show-container .item>span {
+    font-style: italic;
+    color: #1a73e8;
+}
+
+.show-container .item>ul,
+.show-container .item>ul>li {
+    width: 100%;
+}
+
+.show-container .item>ul>li {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
-    width: 500px;
-    padding-top: 100px;
-}
-
-.languages div {
-    width: 225px;
-}
-
-.languages div span {
-    float: right;
-}
-
-.help {
-    display: none;
-}
-
-.help .command {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    width: 500px;
-    padding-top: 100px;
-}
-
-.help .command div {
-    width: 500px;
-}
-
-.help .command div span {
-    float: right;
 }
