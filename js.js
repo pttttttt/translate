@@ -3,39 +3,23 @@ const target = document.querySelector('.target')
 const dst = document.querySelector('.dst')
 const container = document.querySelector('.show-container')
 
-/* 
-  api所需参数
-*/
-
-const appid = '替换为你的APPID' // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
-const key = '替换为你的秘钥' // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
-if (appid === '替换为你的APPID' || key === '替换为你的秘钥') {
-  target.innerText = '无法使用翻译功能!'
-  target.style.color = 'red'
-  dst.innerText = '请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!\n请替换为你自己的AppId和秘钥!'
-  dst.style.color = 'red'
-}
-let salt = 123
-// (new Date).getTime()
+// api所需参数
+let salt = new Date()
 let from = 'auto'
 let to = 'zh'
 let query = ''
-// 多个query可以用\n连接  如 query='apple\norange\nbanana\npear'
 let str1 = ''
 let sign = ''
+let ocr = '自动检测'
 
 let isAutoMode = true // 判断当前是否为自动模式
 let isCommandMode = false // 判断当前是否为命令模式
 
-/* 
-  配置对象
-*/
+// 配置对象
 
-// 语种
-const languages = [{ name: '中文', code: 'zh', alias: ['china', '中国', '新加坡', '汉语'] }, { name: '英语', code: 'en', alias: ['english', '大不列颠共和国', '英国', '美国', '大不列颠', '日不落帝国', '日不落'] }, { name: '粤语', code: 'yue', alias: ['广东'] }, { name: '文言文', code: 'wyw', alias: ['古汉语'] }, { name: '繁体中文', code: 'cht', alias: ['繁体', '台湾'] }, { name: '日语', code: 'jp', alias: ['日本', '樱花', '小日子'] }, { name: '韩语', code: 'kor', alias: ['韩国'] }, { name: '法语', code: 'fra', alias: ['法国'] }, { name: '西班牙语', code: 'spa', alias: ['西班牙'] }, { name: '泰语', code: 'th', alias: ['泰国'] }, { name: '阿拉伯语', code: 'ara', alias: ['阿拉伯'] }, { name: '俄语', code: 'ru', alias: ['俄罗斯', '俄国'] }, { name: '葡萄牙语', code: 'pt', alias: ['葡萄牙'] }, { name: '德语', code: 'de', alias: ['德国'] }, { name: '意大利语', code: 'it', alias: ['意大利'] }, { name: '希腊语', code: 'el', alias: ['希腊'] }, { name: '荷兰语', code: 'nl', alias: ['荷兰'] }, { name: '波兰语', code: 'pl', alias: ['波兰'] }, { name: '保加利亚语', code: 'bul', alias: ['保加利亚'] }, { name: '爱沙尼亚语', code: 'est', alias: ['爱沙尼亚'] }, { name: '丹麦语', code: 'dan', alias: ['丹麦'] }, { name: '芬兰语', code: 'fin', alias: ['芬兰'] }, { name: '捷克语', code: 'cs', alias: ['捷克'] }, { name: '罗马尼亚语', code: 'rom', alias: ['罗马尼亚'] }, { name: '斯洛文尼亚语', code: 'slo', alias: ['斯洛文尼亚'] }, { name: '瑞典语', code: 'swe', alias: ['瑞典'] }, { name: '匈牙利语', code: 'hu', alias: ['匈牙利'] }, { name: '越南语', code: 'vie', alias: ['越南'] }, { name:  `自动`, code: 'auto', alias: ['智能'] }]
-// 错误码
-const errorCode = [{ code: '52001', meaning: '请求超时', resolvent: '请重试' }, { code: '52002', meaning: '系统错误', resolvent: '请重试' }, { code: '52003', meaning: '未授权用户', resolvent: '请检查appid是否正确或者服务是否开通' }, { code: '54000', meaning: '必填参数为空', resolvent: '请检查是否少传参数' }, { code: '54001', meaning: '签名错误', resolvent: '请检查您的签名生成方法' }, { code: '54003', meaning: '访问频率受限', resolvent: '请降低您的调用频率，或进行身份认证后切换为高级版/尊享版 ' }, { code: '54004', meaning: '账户余额不足', resolvent: '请前往管理控制台为账户充值' }, { code: '54005', meaning: '长文本请求频繁', resolvent: '请降低长文本的发送频率，3s后再试' }, { code: '58000', meaning: '客户端IP非法', resolvent: '检查个人资料里填写的IP地址是否正确，可前往开发者信息-基本信息修改 ' }, { code: '58001', meaning: '译文语言方向不支持', resolvent: '检查译文语言是否在语言列表里' }, { code: '58002', meaning: '服务当前已关闭', resolvent: '请前往管理控制台开启服务' }, { code: '90107', meaning: '认证未通过或未生效', resolvent: '请前往我的认证查看认证进度' }]
-// 命令
+/**
+ * 命令配置对象
+ */
 const command = [
   {
     code: ['-help', '-h'],
@@ -61,7 +45,7 @@ const command = [
             input.value = ''
           }
         })
-        if (!html)  dstChange(`执行失败\n未找到命令：${parameter}`)
+        if (!html) dstChange(`执行失败\n未找到命令：${parameter}`)
       } else {
         addChild(commandHtml, 'table')
         input.value = ''
@@ -78,13 +62,14 @@ const command = [
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       if (parameter) {
         dstChange('正在切换中', 'white')
-        const tmpTo = handleLanguages(parameter)
-        ajax('苹果', tmpTo).then(res => {
+        const [tmpTo] = queryKeyword(parameter)
+        if (!tmpTo) return dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${parameter}`)
+        _translate('苹果', tmpTo).then(res => {
           if (res.trans_result) {
             let result = lookup(tmpTo, languages)
             to = tmpTo
             dstChange(`切换成功`, 'white')
-            target.innerText = `目标语言: ${result.code}[${result.name}] ${isCommandMode && '命令模式'}`
+            tipTextChange(`${result.code}[${result.name}]`, ocr, isCommandMode)
             input.value = ''
             isAutoMode = false
           } else {
@@ -93,7 +78,7 @@ const command = [
         })
       } else {
         isAutoMode = true
-        target.innerText = `目标语言: 自动`
+        tipTextChange('自动')
         input.value = ''
         dstChange(`已恢复为自动`, 'white')
       }
@@ -107,7 +92,7 @@ const command = [
     fn ([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       if (parameter) {
-        const result = lookup(handleLanguages(parameter), languages)
+        const result = lookup(queryKeyword(parameter)[0], languages)
         if (result) {
           let html = `<span>${parameter}</span>
                     <ul>
@@ -146,7 +131,6 @@ const command = [
     fn ([command, parameter, suffix]) {
       if (parameter) {
         let url = this.url[this.parameter.indexOf(parameter)]
-        console.log(url)
         if (!url) return dstChange(`执行失败\n命令 ${command} 中不支持参数：${parameter}`)
         if (this.suffix.indexOf(suffix) + 1) window.location.href = url
         else if (suffix && suffix !== '') dstChange(`执行失败\n命令 ${command} 中，不支持后缀：${suffix}`)
@@ -163,45 +147,69 @@ const command = [
       if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
       modeChange()
     }
-  }]
-// 键盘绑定事件
+  },
+  {
+    code: ['-type', '-t'],
+    parameter: ['所有图片文本识别语种'],
+    suffix: [],
+    usageMethod: '切换图片文本识别语种',
+    fn ([command, parameter, suffix]) {
+      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
+      if (!parameter) {
+        addChild(ocrLanguagesHtml, 'table')
+        dstChange("使用'-clear'或'-c'隐藏", 'white')
+        input.value = ''
+      } else {
+        const [code, resultObj] = queryKeyword(parameter, OCRLanguages)
+        if (code) {
+          ocr = resultObj.name
+          dstChange('切换ocr语种成功', 'white')
+          tipTextChange(to, ocr, isCommandMode)
+          input.value = ''
+        } else {
+          dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-hlep type 以查看所有支持的语种`)
+        }
+      }
+    }
+  },
+  {
+    code: ['-token'],
+    parameter: [],
+    suffix: [],
+    usageMethod: '更新百度OCR的token',
+    fn  ([command, parameter, suffix]) {
+      if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
+      _getToken(apiKey, secretKey).then(data => {
+        dstChange(`token更新成功\n新:${data}\n旧:${token}`, 'white')
+        localStorage.setItem('token', data)
+        token = data
+      })
+    }
+  }
+]
+/**
+ * 键盘绑定事件
+ */
 const keyEvent = [
   {
     key: 'Enter',
     combinationKey: 'enter',
     usageMethod: '翻译或者执行命令',
     fn (e) {
-      query = input.value.replace(/^\s*|\s*$/g,"") // 去除输入文本前后的空格
+      query = input.value.replace(/^\s*|\s*$/g, "") // 去除输入文本前后的空格
+      if (e.ctrlKey) { // 识别图片文本
+        const [code] = queryKeyword(query, OCRLanguages)
+        if (!code) return dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-hlep type 以查看所有支持的语种`)
+        _ocrHandler(code && ocr)
+        return
+      }
       if (isCommandMode) query = query[0] === '-' ? query : '-' + query // 命令模式下自动给字符串首字母新增字符 -
       if (query === '') return dstChange('内容不能为空')
-      history.clearSubscript() // 重置历史记录下标位置
+      history.resetSubscript() // 重置历史记录下标位置
       if (isCommandMode || query[0] === '-') { // 执行命令
-        addHistory(query, history.command) // 记录
-        const strArr = query.split(/\s+/) // 以 命令 参数 后缀 分割字符串
-        if (strArr.length > 3) return dstChange('执行失败\n命令格式错误！\n请使用以下格式：-[命令] [参数] [后缀]')
-        for (let i = 0, n = command.length; i < n; i++) {
-          if (command[i].code.indexOf(strArr[0]) !== -1) return command[i].fn(strArr)
-        }
-        dstChange(`执行失败 \n命令不存在: ${query} \n输入-h查看所有命令`)
+        _executeCommandHandler(query)
       } else { // 翻译
-        if(isAutoMode) to = /.*[\u4e00-\u9fa5]+.*$/.test(query) ? 'en' : 'zh' // 判断输入文本是否含有中文
-        dstChange('正在翻译中', 'white')
-        ajax(query, to).then(res => { // 翻译并处理翻译结果
-          let dst = '翻译失败，请按下回车键重新翻译'
-          if (res.trans_result) {
-            dst = res.trans_result[0].dst
-            dstChange(dst, 'white')
-          } else {
-            let result = lookup(res.error_code, errorCode)
-            dstChange(
-              `翻译失败
-              错误码: ${result.code}
-              ${result.meaning}
-              解决方法:  ${result.resolvent}`
-              )
-            }
-          addHistory(query, history.translate, dst)
-        })
+        _translateHanlder(query)
       }
     }
   },
@@ -220,6 +228,7 @@ const keyEvent = [
     usageMethod: '读取历史记录',
     fn (e) {
       if (e.ctrlKey || isCommandMode) readHistory(history.command, true)
+      else if (e.altKey) readHistory(history.ocr, true)
       else readHistory(history.translate, true)
     }
   },
@@ -229,6 +238,7 @@ const keyEvent = [
     usageMethod: '读取历史记录',
     fn (e) {
       if (e.ctrlKey || isCommandMode) readHistory(history.command, false)
+      else if (e.altKey) readHistory(history.ocr, false)
       else readHistory(history.translate, false)
     }
   },
@@ -249,7 +259,9 @@ const keyEvent = [
     }
   }
 ]
-// 历史记录
+/**
+ * 历史记录
+ */
 const history = {
   translate: {
     currentLocation: -1,
@@ -261,11 +273,17 @@ const history = {
     arr: [],
     dstText: []
   },
-  clearSubscript () {
+  ocr: {
+    currentLocation: -1,
+    arr: [],
+    dstText: []
+  },
+  resetSubscript() {
     this.translate.currentLocation = -1
     this.command.currentLocation = -1
+    this.ocr.currentLocation = -1
   },
-  clearHistory (sign) {
+  clearHistory(sign) {
     if (sign) {
       this[sign].arr = []
     } else {
@@ -276,87 +294,131 @@ const history = {
   }
 }
 
+// 生成查询表格
 let languagesHtml = '<div>语种代码<span>对应语种</span></div>'
+let ocrLanguagesHtml = '<div>语种代码<span>对应语种</span></div>'
 let commandHtml = '<div>命令<span>使用方法</span></div>'
 let keyEventHtml = '<div>快捷键<span>作用</span></div>'
-languages.forEach( v => {
+languages.forEach(v => {
   languagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
 })
-command.forEach( v => {
+ocrLanguagesHtml.forEach(v => {
+  ocrLanguagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
+})
+command.forEach(v => {
   commandHtml += `<div>${v.code.join(' 或 ')}<span>${v.usageMethod}</span></div>`
 })
-keyEvent.forEach( v => {
+keyEvent.forEach(v => {
   keyEventHtml += `<div>${v.combinationKey}<span>${v.usageMethod}</span></div>`
 })
 
-/* 
-  逻辑主体
-*/
-
+// 逻辑主体
 input.focus() // 打开网页时自动聚焦
-input.innerText = `<span style="color: red;">123</span>`
+tipTextChange('自动', ocr)
 window.oncontextmenu = () => false // 禁用鼠标右键
-// window.onkeydown = window.onkeyup = window.onkeypress = function () {
-//   window.event.returnValue = false;
-//   return false;
-// }
 dst.addEventListener('mouseup', e => e.stopPropagation()) // 阻止鼠标在结果区域时的事件冒泡
 addEventListener('mousedown', e => e.button === 2 ? copyText(dst.innerText) : false) // 鼠标按下右键 将翻译结果复制到剪切板
 addEventListener('mouseup', e => {
   input.focus() // 鼠标点击自动聚焦
   e.button === 1 && (input.value = '') // 鼠标点击中键 将输入框清空
-  if (e.button === 4) input.value = input.value.replace(/(?<!\s)([A-Z])/g, ' $1') // 鼠标点击中键 分割驼峰命名法各个单词
+  if (e.button === 4) input.value = input.value.replace(/(?<!\s)([A-Z])/g, ' $1') // 鼠标点击4键 分割驼峰命名法各个单词
 })
 addEventListener('keyup', e => {
   for (let i = 0, n = keyEvent.length; i < n; i++) {
     if (keyEvent[i].key === e.key) keyEvent[i].fn(e)
   }
-  // console.log(e.key)
 })
+// 回调函数
 
-/*
-  回调函数
-*/
+/**
+ * 执行命令
+ * @param {string} query 输入的命令字符
+ */
+function _executeCommandHandler(query) {
+  addHistory(query, history.command) // 记录
+  const strArr = query.split(/\s+/) // 以 命令 参数 后缀 分割字符串
+  if (strArr.length > 3) return dstChange('执行失败\n命令格式错误！\n请使用以下格式：-[命令] [参数] [后缀]')
+  for (let i = 0, n = command.length; i < n; i++) {
+    if (command[i].code.indexOf(strArr[0]) !== -1) return command[i].fn(strArr)
+  }
+  dstChange(`执行失败 \n命令不存在: ${query} \n输入-h查看所有命令`)
+}
 
-// 发送ajax请求
-function ajax (query, to) {
-  str1 = appid + query + salt + key
-  sign = MD5(str1)
-  return new Promise((res, rel) => {
-    $.ajax({
-      url: 'http://api.fanyi.baidu.com/api/trans/vip/translate',
-      type: 'get',
-      dataType: 'jsonp',
-      timeout: 5000,
-      data: {
-        q: query,
-        appid: appid,
-        salt: salt,
-        from: from,
-        to: to,
-        sign: sign
-      },
-      success(data) {
-        res(data)
-      },
-      error(data, exception) {
-        if (exception === 'timeout') {
-          dstChange(`请求超时，请检查您的网络连接`)
-        }
-      }
+/**
+ * 翻译处理程序
+ * @param {string} query 输入的字符串
+ */
+function _translateHanlder(query) {
+  if (isAutoMode) to = /.*[\u4e00-\u9fa5]+.*$/.test(query) ? 'en' : 'zh' // 判断输入文本是否含有中文
+  dstChange('正在翻译中', 'white')
+  _translate(query, to).then(res => { // 翻译并处理翻译结果
+    let dst = '翻译失败，请按下回车键重新翻译'
+    if (res.trans_result) {
+      dst = res.trans_result[0].dst
+      dstChange(dst, 'white')
+    } else {
+      let result = lookup(res.error_code, errorCode)
+      dstChange(
+        `翻译失败
+        错误码: ${result.code}
+        ${result.meaning}
+        解决方法:  ${result.resolvent}`
+      )
+    }
+    addHistory(query, history.translate, dst)
+  })
+}
+
+/**
+ * 图片文本识别
+ * @param {string} languageType 待识别的语种
+ */
+function _ocrHandler(languageType = 'auto_detect') {
+  history.resetSubscript() // 重置历史记录下标位置
+  dstChange('正在获取图片文件', 'white')
+  _getFileData().then(data => {
+    if (data.code !== 200) return dstChange(data.msg)
+    const imgFileNameList = data.data.filter(fileName => fileName.match(/\.(jpg|jpeg|png|bmp)$/))
+    if (imgFileNameList.length === 0) return dstChange('该文件夹没有找到合适格式的图片')
+    const imgFilePath = data.path + '\\' + imgFileNameList.pop()
+    input.value = imgFilePath
+    addChild(`<img src="${imgFilePath}"/>`, 'img')
+    _getFileData(imgFilePath).then(data => {
+      if (data.code !== 200) return dstChange(data.msg)
+      const imageFile = data.data
+      dstChange(`正在识别文件：${imgFilePath}`, 'white')
+      _imgTextRecognition({ image: imageFile, language_type: languageType })
+        .then(OCRResult => {
+          const resultArr = new Array()
+          OCRResult.words_result.forEach(value => {
+            resultArr.push(value.words)
+          })
+          const resultStr = resultArr.join('\n')
+          dstChange(resultStr, 'white')
+          addHistory(imgFilePath, history.ocr, resultStr) // 记录
+        })
     })
   })
 }
 
-// 匹配代码所对应的对象
-function lookup (data, arr) {
+/**
+ * 匹配代码所对应的对象
+ * @param {object} data 需查询的数据
+ * @param {array} arr 在此数组中查询
+ * @returns 查询结果
+ */
+function lookup(data, arr) {
   let result = false
   arr.forEach(v => result = v.code === data ? v : result)
   return result
 }
-// document.execCommand
-// 将传入的字符串复制到剪切板
-function copyText (text) {
+
+/**
+ * 将传入的字符串复制到剪切板
+ * @param {string} text 需粘贴到剪贴板的字符串
+ * @returns {boolean} 成功与否
+ */
+function copyText(text) {
   let textarea = document.createElement("input")//创建input元素
   const currentFocus = document.activeElement//当前获得焦点的元素，保存一下
   document.body.appendChild(textarea)//添加元素
@@ -366,7 +428,7 @@ function copyText (text) {
   //textarea.select(); 这个是直接选中所有的，效果和上面一样
   try {
     var flag = document.execCommand("copy")//执行复制
-  } catch(eo) {
+  } catch (eo) {
     var flag = false
   }
   document.body.removeChild(textarea)//删除元素
@@ -374,28 +436,47 @@ function copyText (text) {
   return flag
 }
 
-// 匹配 -s 命令后跟的参数
-function handleLanguages (str) {
-  for (let i = 0; i < languages.length; i++) {
-    const language = languages[i]
-    if (str === language.code || str === language.name) return language.code
-    const matchedAlias = language.alias.some(alias => alias === str)
-    if (matchedAlias) return language.code
+/**
+ * 匹配传入字符所在传入对象中对应的代码
+ * @param {string} query -s 命令后跟的参数
+ * @param {object} obj 在此对象中查询
+ * @returns {array} 匹配结果
+ */
+function queryKeyword(query, obj = languages) {
+  let result = null
+  for (let i = 0; i < obj.length; i++) {
+    const language = obj[i]
+    if (query === language.code || query === language.name) {
+      result = language
+      break
+    }
+    const matchedAlias = language.alias.some(alias => alias === query)
+    if (matchedAlias) {
+      result = language
+      break
+    }
   }
-  return str
+  return [result && result.code, result]
 }
 
-// 切换模式
-function modeChange () {
+/**
+ * 切换模式
+ */
+function modeChange() {
   isCommandMode = !isCommandMode
   const result = lookup(to, languages)
-  target.innerText = isCommandMode ? '命令模式 输入-退出' : `目标语言: ${isAutoMode ? '自动' : `${to}[${result.name}]`}`
+  if (isCommandMode) target.innerText = '命令模式 输入-退出'
+  else tipTextChange(isAutoMode ? '自动' : `${to}[${result.name}]`)
   input.value = ''
   dstChange('切换成功', 'white')
 }
 
-// 创建并新增子节点
-function addChild (html, myClass = 'item') {
+/**
+ * 创建并新增子节点
+ * @param {string} html 子节点中的html代码
+ * @param {string} myClass 该节点的类名
+ */
+function addChild(html, myClass = 'item') {
   const div = document.createElement('div')
   div.classList.add(myClass)
   div.innerHTML = html
@@ -403,14 +484,23 @@ function addChild (html, myClass = 'item') {
   container.insertBefore(div, child)
 }
 
-// 结果显示区域的文本以及样式切换
-function dstChange (text = 'error', color = 'red') {
+/**
+ * 结果显示区域的文本以及样式切换
+ * @param {string} text 文本
+ * @param {string} color 文本颜色
+ */
+function dstChange(text = 'error', color = 'red') {
   dst.style.color = color
   dst.innerText = text
 }
 
-// 记录
-function addHistory (str, obj, dst) {
+/**
+ * 记录
+ * @param {string} str input 输入框的值
+ * @param {object} obj 存储目标对象
+ * @param {string} dst dst 区域的值
+ */
+function addHistory(str, obj, dst) {
   const isRepeat = obj.arr.indexOf(str)
   isRepeat !== -1 && obj.arr.splice(isRepeat, 1)
   obj.arr.unshift(str)
@@ -420,10 +510,24 @@ function addHistory (str, obj, dst) {
   }
 }
 
-// 读取记录
-function readHistory (obj, judge) {
+/**
+ * 读取记录
+ * @param {object} obj 读取目标对象
+ * @param {boolean} judge 读取方向
+ */
+function readHistory(obj, judge) {
   if (judge) obj.currentLocation < obj.arr.length - 1 && obj.currentLocation++
   else obj.currentLocation > 0 && obj.currentLocation--
   obj.currentLocation >= 0 && (input.value = obj.arr[obj.currentLocation])
   obj.dstText[obj.currentLocation] && dstChange(obj.dstText[obj.currentLocation], 'white')
+}
+
+/**
+ * 更改提示区域文本
+ * @param {string} translateLanguages 翻译目标语种
+ * @param {string} ocrLanguages ocr目标语种
+ * @param {boolean} isCommandMode 是否显示命令模式的提示
+ */
+function tipTextChange(translateLanguages = '自动', ocrLanguages = '自动检测', isCommandMode = false) {
+  target.innerText = `目标语言: ${translateLanguages} ocr语言: ${ocrLanguages} ${isCommandMode ? '<- 命令模式 ->' : ''}`
 }
