@@ -302,7 +302,7 @@ let keyEventHtml = '<div>快捷键<span>作用</span></div>'
 languages.forEach(v => {
   languagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
 })
-ocrLanguagesHtml.forEach(v => {
+OCRLanguages.forEach(v => {
   ocrLanguagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
 })
 command.forEach(v => {
