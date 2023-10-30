@@ -8,75 +8,24 @@ function _translate (query, to) {
   str1 = appid + query + salt + key
   sign = MD5(str1)
   return new Promise((res, rej) => {
-    $.ajax({
-      url: 'http://api.fanyi.baidu.com/api/trans/vip/translate',
-      type: 'get',
-      dataType: 'jsonp',
-      timeout: 5000,
-      data: {
-        q: query,
-        appid: appid,
-        salt: salt,
-        from: from,
-        to: to,
-        sign: sign
-      },
-      success(data) {
-        res(data)
-      },
-      error(data, exception) {
-        if (exception === 'timeout') {
-          dstChange(`请求超时，请检查您的网络连接`)
-        } else {
-          dstChange('翻译失败')
-          rej(data)
-        }
-      }
+    ajax.jsonp('http://api.fanyi.baidu.com/api/trans/vip/translate', {
+      q: query,
+      appid: appid,
+      salt: salt,
+      from: from,
+      to: to,
+      sign: sign
+    },
+    {
+      timeout: 5000
+    }).then(data => {
+      res(data)
+    }, err => {
+      dstChange(err.msg)
+      rej(err)
     })
   })
 }
-
-// function _updateOCRToken () {
-//   console.log(`https://aip.baidubce.com/oauth/2.0/token?client_id=${apiKey}&client_secret=${secretKey}&grant_type=client_credentials`)
-//   $.ajax({
-//     url: `https://aip.baidubce.com/oauth/2.0/token?client_id=${apiKey}&client_secret=${secretKey}&grant_type=client_credentials`,
-//     type: 'GET',
-//     dataType: 'jsonp',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
-//     },
-//     success (data) {
-//       console.log(data, 1)
-//     },
-//     error (data) {
-//       console.log(data, 2)
-//     }
-//   })
-// }
-// _updateOCRToken()
-
-// function getToken() {
-// const url = `https://aip.baidubce.com/oauth/2.0/token?client_id=${apiKey}&client_secret=${secretKey}&grant_type=client_credentials`
-
-//   $.ajax({
-//       url: url,
-//       method: 'POST',
-//       dataType: 'jsonp',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         Accept: 'application/json'
-//       },
-//       success: function(data) {
-//         console.log(data.access_token)
-//       },
-//       error: function(error) {
-//         console.error(error)
-//       }
-//   })
-// }
-
-// getToken()
 
 /**
  * 百度ocr api
@@ -87,24 +36,13 @@ function _translate (query, to) {
  */
 function _imgTextRecognition (data, isNeedHighPrecision = true, isNeedPosition = false) {
   return new Promise((res, rej) => {
-    $.ajax({
-      url: `https://aip.baidubce.com/rest/2.0/ocr/v1/${isNeedHighPrecision ? 'accurate' : 'general'}${isNeedPosition ? '' : '_basic'}?access_token=${token}`,
-      type: 'post',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      timeout: 5000,
-      data,
-      success(data) {
+    ajax.post(`https://aip.baidubce.com/rest/2.0/ocr/v1/${isNeedHighPrecision ? 'accurate' : 'general'}${isNeedPosition ? '' : '_basic'}?access_token=${token}`, data, { timeout: 5000 })
+      .then(data => {
         res(data)
-      },
-      error(data, exception) {
-        if (exception === 'timeout') {
-          dstChange('请求超时，请检查您的网络连接')
-        } else {
-          dstChange('识别失败\n可能是token失效\n请输入-token命令更新token')
-          rej(data)
-        }
-      }
-    })
+      }, err => {
+        dstChange(err.msg)
+        rej(err)
+      })
   })
 }
 
@@ -115,18 +53,13 @@ function _imgTextRecognition (data, isNeedHighPrecision = true, isNeedPosition =
  */
 function _getFileData (path = 'C:\\Users\\86136\\Pictures\\Screenshots', original = false) {
   return new Promise((res, rej) => {
-    $.ajax({
-      url: 'http://127.0.0.1:3000/api/getFileData',
-      type: 'post',
-      data: JSON.stringify({ path, original }),
-      success (data) {
-        res(JSON.parse(data))
-      },
-      error (data) {
-        dstChange(data.msg || '从本地服务上获取数据失败, 请检查本地服务是否启动或者其他原因')
-        rej(data)
-      }
-    })
+    ajax.post('http://127.0.0.1:3000/api/getFileData', JSON.stringify({ path, original }))
+      .then(data => {
+        res(data)
+      }, err => {
+        dstChange('从本地服务上获取图片数据失败,请检查本地服务是否启动')
+        rej(err)
+      })
   })
 }
 
@@ -138,17 +71,11 @@ function _getFileData (path = 'C:\\Users\\86136\\Pictures\\Screenshots', origina
  */
 function _getToken ( apiKey, secretKey) {
   return new Promise((res, rej) => {
-    $.ajax({
-      url: 'http://127.0.0.1:3000/api/getToken',
-      type: 'post',
-      data: JSON.stringify({ apiKey, secretKey }),
-      success (data) {
-        res(JSON.parse(data))
-      },
-      error (data) {
-        dstChange(data.msg || '从本地服务上获取token失败，请检查本地服务是否启动或者其他原因')
-        rej(data)
-      }
-    })
+    ajax.post('http://127.0.0.1:3000/api/getToken', JSON.stringify({ apiKey, secretKey }))
+      .then(data => {
+        res(data)
+      }, err => {
+        dstChange('从本地服务上获取token失败,请检查本地服务是否启动或者其他原因')
+      })
   })
 }
