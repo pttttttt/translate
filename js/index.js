@@ -2,6 +2,7 @@ const input = document.querySelector('input')
 const target = document.querySelector('.target')
 const dst = document.querySelector('.dst')
 const container = document.querySelector('.show-container')
+const play = document.querySelector('.play')
 
 // api所需参数
 let salt = new Date()
@@ -14,6 +15,8 @@ let ocr = '自动检测'
 
 let isAutoMode = true // 判断当前是否为自动模式
 let isCommandMode = false // 判断当前是否为命令模式
+let tmpText = ''
+const audio = new Audio()
 
 // 配置对象
 
@@ -174,15 +177,18 @@ const command = [
   },
   {
     code: ['-token'],
-    parameter: [],
+    parameter: ['ocr', 'speech'],
     suffix: [],
-    usageMethod: '更新百度OCR的token',
+    usageMethod: '更新各个api的token',
     fn  ([command, parameter, suffix]) {
-      if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
-      _getToken(apiKey, secretKey).then(data => {
-        dstChange(`token更新成功\n新:${data}\n旧:${token}`, 'white')
-        localStorage.setItem('token', data)
-        token = data
+      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
+      const tokenConfig = parameter ? tokens[parameter] : tokens.ocr
+      if (!tokenConfig) return dstChange(`执行失败\n不支持参数:${parameter}\n使用命令：-help token 查看所有支持的参数`)
+      dstChange(`${tokenConfig.name} token(鉴权)更新中`, 'white')
+      _getToken(tokenConfig.ak, tokenConfig.sk).then(data => {
+        dstChange(`${tokenConfig.name} token(鉴权)更新成功\n新:${data}\n旧:${tokenConfig.value}`, 'white')
+        localStorage.setItem(tokenConfig.key, data)
+        tokenConfig.value = data
       })
     }
   }
@@ -317,6 +323,19 @@ input.focus() // 打开网页时自动聚焦
 tipTextChange('自动', ocr)
 window.oncontextmenu = () => false // 禁用鼠标右键
 dst.addEventListener('mouseup', e => e.stopPropagation()) // 阻止鼠标在结果区域时的事件冒泡
+play.addEventListener('click', e => {
+  const text = dst.innerText.replace(/^\s*|\s*$/g, "")
+  if (text === tmpText) {
+    audio.play()
+    return
+  }
+  tmpText = text
+  _speechSynthesis(tmpText).then(data => {
+    console.log('合成成功')
+    audio.src = URL.createObjectURL(data)
+    audio.play()
+  })
+})
 addEventListener('mousedown', e => e.button === 2 ? copyText(dst.innerText) : false) // 鼠标按下右键 将翻译结果复制到剪切板
 addEventListener('mouseup', e => {
   input.focus() // 鼠标点击自动聚焦
@@ -328,6 +347,7 @@ addEventListener('keyup', e => {
     if (keyEvent[i].key === e.key) keyEvent[i].fn(e)
   }
 })
+
 // 回调函数
 
 /**

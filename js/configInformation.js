@@ -3,10 +3,11 @@
 const appid = '20221219001502307'
 const key = 'NGCed1L42z6L8ciJs0rM'
 // 百度ocr
-const apiKey = 'pwVtFCr7ep4KEmHkk6fQ1ru8'
-const secretKey = '1HXTzFafdlqxbFZAzDXnw2l74UkgQsN0'
-// let token = '24.1a0492ca3372afa976f633bba291af71.2592000.1700204625.282335-34862259'
-let token = localStorage.getItem('token')
+const AK_ocr = 'pwVtFCr7ep4KEmHkk6fQ1ru8'
+const SK_ocr = '1HXTzFafdlqxbFZAzDXnw2l74UkgQsN0'
+// 百度语音合成
+const AK_speech = 'nwMr7BIjxnntZRwOIaGhXPGD'
+const SK_speech = 'yljd0oILmqpCcsqnRcfYiLwjUuNtSMIG'
 
 /**
  * 翻译api支持语种
@@ -20,3 +21,21 @@ const OCRLanguages = [{ name: '自动检测', code: 'auto_detect', alias: ['', '
  * 错误码
  */
 const errorCode = [{ code: '52001', meaning: '请求超时', resolvent: '请重试' }, { code: '52002', meaning: '系统错误', resolvent: '请重试' }, { code: '52003', meaning: '未授权用户', resolvent: '请检查appid是否正确或者服务是否开通' }, { code: '54000', meaning: '必填参数为空', resolvent: '请检查是否少传参数' }, { code: '54001', meaning: '签名错误', resolvent: '请检查您的签名生成方法' }, { code: '54003', meaning: '访问频率受限', resolvent: '请降低您的调用频率，或进行身份认证后切换为高级版/尊享版 ' }, { code: '54004', meaning: '账户余额不足', resolvent: '请前往管理控制台为账户充值' }, { code: '54005', meaning: '长文本请求频繁', resolvent: '请降低长文本的发送频率，3s后再试' }, { code: '58000', meaning: '客户端IP非法', resolvent: '检查个人资料里填写的IP地址是否正确，可前往开发者信息-基本信息修改 ' }, { code: '58001', meaning: '译文语言方向不支持', resolvent: '检查译文语言是否在语言列表里' }, { code: '58002', meaning: '服务当前已关闭', resolvent: '请前往管理控制台开启服务' }, { code: '90107', meaning: '认证未通过或未生效', resolvent: '请前往我的认证查看认证进度' }]
+
+// const tokens = [{ key: 'token_ocr', name: '百度ocr', code: 'ocr' }, { key: 'token_speech', name: '百度语音合成', code: 'speech' }]
+const tokens = {
+  ocr: {
+    value: localStorage.getItem('token_ocr'),
+    key: 'token_ocr',
+    name: '百度ocr',
+    ak: AK_ocr,
+    sk: SK_ocr
+  },
+  speech: {
+    value: localStorage.getItem('token_speech'),
+    key: 'token_speech',
+    name: '百度语音合成',
+    ak: AK_speech,
+    sk: SK_speech
+  }
+}
