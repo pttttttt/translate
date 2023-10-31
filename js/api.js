@@ -62,7 +62,7 @@ function _speechSynthesis (text) {
       spd: '5',
       pit: '5',
       vol: '5',
-      per: '1',
+      per: '0', // 度小宇=1，度小美=0，度逍遥（基础）=3，度丫丫=4
       aue: '3'
     },
     {

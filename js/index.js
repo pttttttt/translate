@@ -331,7 +331,6 @@ play.addEventListener('click', e => {
   }
   tmpText = text
   _speechSynthesis(tmpText).then(data => {
-    console.log('合成成功')
     audio.src = URL.createObjectURL(data)
     audio.play()
   })
