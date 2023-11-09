@@ -31,29 +31,28 @@ const command = [
     usageMethod: '查看所有命令',
     fn ([commands, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
-      if (parameter) {
-        parameter[0] !== '-' && (parameter = '-' + parameter)
-        let html
-        command.forEach(value => {
-          if (value.code.indexOf(parameter) + 1) {
-            html = `<span>${parameter}${value.parameter[0] ? ' [参数]' : ''}${value.suffix[0] ? '[后缀]' : ''}</span>
-                    <ul>
-                      <li><span>命令</span><span>${value.code.join(' ')}</span></li>
-                      ${value.parameter[0] ? `<li><span>支持参数</span><span>${value.parameter.join(' ')}</span></li>` : ''}
-                      ${value.suffix[0] ? `<li><span>支持后缀</span><span>${value.suffix.join(' ')}</span></li>` : ''}
-                      <li><span>作用</span><span>${value.usageMethod}</span></li>
-                    </ul>`
-            addChild(html)
-            dstChange(value.usageMethod, 'white')
-            input.value = ''
-          }
-        })
-        if (!html) dstChange(`执行失败\n未找到命令：${parameter}`)
-      } else {
+      if (!parameter) {
         addChild(commandHtml, 'table')
         input.value = ''
         dstChange("使用 -clear 或 -c 隐藏\n所有命令均以 - 开头", 'white')
+        return
       }
+      parameter[0] !== '-' && (parameter = '-' + parameter)
+      let html
+      command.forEach(value => {
+        if (!(value.code.indexOf(parameter) + 1)) return
+        html = `<span>${parameter}${value.parameter[0] ? ' [参数]' : ''}${value.suffix[0] ? '[后缀]' : ''}</span>
+                <ul>
+                  <li><span>命令</span><span>${value.code.join(' ')}</span></li>
+                  ${value.parameter[0] ? `<li><span>支持参数</span><span>${value.parameter.join(' ')}</span></li>` : ''}
+                  ${value.suffix[0] ? `<li><span>支持后缀</span><span>${value.suffix.join(' ')}</span></li>` : ''}
+                  <li><span>作用</span><span>${value.usageMethod}</span></li>
+                </ul>`
+        addChild(html)
+        dstChange(value.usageMethod, 'white')
+        input.value = ''
+      })
+      if (!html) dstChange(`执行失败\n未找到命令：${parameter}`)
     }
   },
   {
@@ -63,54 +62,50 @@ const command = [
     usageMethod: '-s 切换到自动模式\n\n-s [语种代码] 切换到指定语种',
     fn ([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
-      if (parameter) {
-        dstChange('正在切换中', 'white')
-        const [tmpTo] = queryKeyword(parameter)
-        if (!tmpTo) return dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${parameter}`)
-        _translate('苹果', tmpTo).then(res => {
-          if (res.trans_result) {
-            let result = lookup(tmpTo, languages)
-            to = tmpTo
-            dstChange(`切换成功`, 'white')
-            tipTextChange(`${result.code}[${result.name}]`, ocr, isCommandMode)
-            input.value = ''
-            isAutoMode = false
-          } else {
-            dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${tmpTo}`)
-          }
-        })
-      } else {
+      if (!parameter) {
         isAutoMode = true
         tipTextChange('自动')
         input.value = ''
-        dstChange(`已恢复为自动`, 'white')
+        dstChange('已恢复为自动', 'white')
+        return
       }
+      dstChange('正在切换中', 'white')
+      const [tmpTo] = queryKeyword(parameter)
+      if (!tmpTo) return dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${parameter}`)
+      _translate('苹果', tmpTo).then(res => {
+        if (!res.trans_result) return dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${tmpTo}`)
+        let result = lookup(tmpTo, languages)
+        to = tmpTo
+        dstChange(`切换成功`, 'white')
+        tipTextChange(`${result.code}[${result.name}]`, ocr, isCommandMode)
+        input.value = ''
+        isAutoMode = false
+      })
     }
   },
   {
-    code: ['-show'],
+    code: ['-check', '-ck'],
     parameter: ['所有语种代码以及别称'],
     suffix: [],
     usageMethod: '查看各个语种以及对应代码',
     fn ([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
-      if (parameter) {
-        const result = lookup(queryKeyword(parameter)[0], languages)
-        if (result) {
-          let html = `<span>${parameter}</span>
-                    <ul>
-                      <li><span>语种</span><span>${result.name}</span></li>
-                      <li><span>代码</span><span>${result.code}</span></li>
-                      <li><span>别名</span><span>${result.alias.join(' ')}</span></li>
-                    </ul>`
-          addChild(html)
-          input.value = ''
-        } else return dstChange(`执行失败\n未从支持语种中找语种: ${parameter}`)
-      } else {
+      dstChange("使用'-clear'或'-c'隐藏", 'white')
+      if (!parameter) {
         addChild(languagesHtml, 'table')
         input.value = ''
+        return
       }
-      dstChange("使用'-clear'或'-c'隐藏", 'white')
+      const result = lookup(queryKeyword(parameter)[0], languages)
+      if (!result) return dstChange(`执行失败\n未从支持语种中找语种: ${parameter}`)
+      let html = `<span>${parameter}</span>
+                <ul>
+                  <li><span>语种</span><span>${result.name}</span></li>
+                  <li><span>代码</span><span>${result.code}</span></li>
+                  <li><span>别名</span><span>${result.alias.join(' ')}</span></li>
+                </ul>`
+      addChild(html)
+      input.value = ''
     }
   },
   {
@@ -162,21 +157,18 @@ const command = [
         addChild(ocrLanguagesHtml, 'table')
         dstChange("使用'-clear'或'-c'隐藏", 'white')
         input.value = ''
-      } else {
-        const [code, resultObj] = queryKeyword(parameter, OCRLanguages)
-        if (code) {
-          ocr = resultObj.name
-          dstChange('切换ocr语种成功', 'white')
-          tipTextChange(to, ocr, isCommandMode)
-          input.value = ''
-        } else {
-          dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-hlep type 以查看所有支持的语种`)
-        }
+        return
       }
+      const [code, resultObj] = queryKeyword(parameter, OCRLanguages)
+      if (!code) return dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-hlep type 以查看所有支持的语种`)
+      ocr = resultObj.name
+      dstChange('切换ocr语种成功', 'white')
+      tipTextChange(to, ocr, isCommandMode)
+      input.value = ''
     }
   },
   {
-    code: ['-token'],
+    code: ['-token', '-tk'],
     parameter: ['ocr', 'speech'],
     suffix: [],
     usageMethod: '更新各个api的token',
@@ -284,12 +276,12 @@ const history = {
     arr: [],
     dstText: []
   },
-  resetSubscript() {
+  resetSubscript () {
     this.translate.currentLocation = -1
     this.command.currentLocation = -1
     this.ocr.currentLocation = -1
   },
-  clearHistory(sign) {
+  clearHistory (sign) {
     if (sign) {
       this[sign].arr = []
     } else {
@@ -353,29 +345,26 @@ addEventListener('keyup', e => {
  * 执行命令
  * @param {string} query 输入的命令字符
  */
-function _executeCommandHandler(query) {
+function _executeCommandHandler (query) {
   addHistory(query, history.command) // 记录
   const strArr = query.split(/\s+/) // 以 命令 参数 后缀 分割字符串
   if (strArr.length > 3) return dstChange('执行失败\n命令格式错误！\n请使用以下格式：-[命令] [参数] [后缀]')
   for (let i = 0, n = command.length; i < n; i++) {
     if (command[i].code.indexOf(strArr[0]) !== -1) return command[i].fn(strArr)
   }
-  dstChange(`执行失败 \n命令不存在: ${query} \n输入-h查看所有命令`)
+  dstChange(`执行失败 \n命令不存在: ${strArr[0]} \n输入-h查看所有命令`)
 }
 
 /**
  * 翻译处理程序
  * @param {string} query 输入的字符串
  */
-function _translateHanlder(query) {
+function _translateHanlder (query) {
   if (isAutoMode) to = /.*[\u4e00-\u9fa5]+.*$/.test(query) ? 'en' : 'zh' // 判断输入文本是否含有中文
   dstChange('正在翻译中', 'white')
   _translate(query, to).then(res => { // 翻译并处理翻译结果
     let dst = '翻译失败，请按下回车键重新翻译'
-    if (res.trans_result) {
-      dst = res.trans_result[0].dst
-      dstChange(dst, 'white')
-    } else {
+    if (!res.trans_result) {
       let result = lookup(res.error_code, errorCode)
       dstChange(
         `翻译失败
@@ -383,7 +372,10 @@ function _translateHanlder(query) {
         ${result.meaning}
         解决方法:  ${result.resolvent}`
       )
+      return
     }
+    dst = res.trans_result[0].dst
+    dstChange(dst, 'white')
     addHistory(query, history.translate, dst)
   })
 }
@@ -392,7 +384,7 @@ function _translateHanlder(query) {
  * 图片文本识别
  * @param {string} languageType 待识别的语种
  */
-function _ocrHandler(languageType = 'auto_detect') {
+function _ocrHandler (languageType = 'auto_detect') {
   history.resetSubscript() // 重置历史记录下标位置
   dstChange('正在获取图片文件', 'white')
   _getFileData().then(data => {
@@ -426,7 +418,7 @@ function _ocrHandler(languageType = 'auto_detect') {
  * @param {array} arr 在此数组中查询
  * @returns 查询结果
  */
-function lookup(data, arr) {
+function lookup (data, arr) {
   let result = false
   arr.forEach(v => result = v.code === data ? v : result)
   return result
@@ -437,7 +429,7 @@ function lookup(data, arr) {
  * @param {string} text 需粘贴到剪贴板的字符串
  * @returns {boolean} 成功与否
  */
-function copyText(text) {
+function copyText (text) {
   let textarea = document.createElement("input")//创建input元素
   const currentFocus = document.activeElement//当前获得焦点的元素，保存一下
   document.body.appendChild(textarea)//添加元素
@@ -461,7 +453,7 @@ function copyText(text) {
  * @param {object} obj 在此对象中查询
  * @returns {array} 匹配结果
  */
-function queryKeyword(query, obj = languages) {
+function queryKeyword (query, obj = languages) {
   let result = null
   for (let i = 0; i < obj.length; i++) {
     const language = obj[i]
@@ -481,7 +473,7 @@ function queryKeyword(query, obj = languages) {
 /**
  * 切换模式
  */
-function modeChange() {
+function modeChange () {
   isCommandMode = !isCommandMode
   const result = lookup(to, languages)
   if (isCommandMode) target.innerText = '命令模式 输入-退出'
@@ -495,7 +487,7 @@ function modeChange() {
  * @param {string} html 子节点中的html代码
  * @param {string} myClass 该节点的类名
  */
-function addChild(html, myClass = 'item') {
+function addChild (html, myClass = 'item') {
   const div = document.createElement('div')
   div.classList.add(myClass)
   div.innerHTML = html
@@ -504,22 +496,12 @@ function addChild(html, myClass = 'item') {
 }
 
 /**
- * 结果显示区域的文本以及样式切换
- * @param {string} text 文本
- * @param {string} color 文本颜色
- */
-function dstChange(text = 'error', color = 'red') {
-  dst.style.color = color
-  dst.innerText = text
-}
-
-/**
  * 记录
  * @param {string} str input 输入框的值
  * @param {object} obj 存储目标对象
  * @param {string} dst dst 区域的值
  */
-function addHistory(str, obj, dst) {
+function addHistory (str, obj, dst) {
   const isRepeat = obj.arr.indexOf(str)
   isRepeat !== -1 && obj.arr.splice(isRepeat, 1)
   obj.arr.unshift(str)
@@ -534,11 +516,21 @@ function addHistory(str, obj, dst) {
  * @param {object} obj 读取目标对象
  * @param {boolean} judge 读取方向
  */
-function readHistory(obj, judge) {
+function readHistory (obj, judge) {
   if (judge) obj.currentLocation < obj.arr.length - 1 && obj.currentLocation++
   else obj.currentLocation > 0 && obj.currentLocation--
   obj.currentLocation >= 0 && (input.value = obj.arr[obj.currentLocation])
   obj.dstText[obj.currentLocation] && dstChange(obj.dstText[obj.currentLocation], 'white')
+}
+
+/**
+ * 结果显示区域的文本以及样式切换
+ * @param {string} text 文本
+ * @param {string} color 文本颜色
+ */
+function dstChange (text = 'error', color = 'red') {
+  dst.style.color = color
+  dst.innerText = text
 }
 
 /**
@@ -547,6 +539,6 @@ function readHistory(obj, judge) {
  * @param {string} ocrLanguages ocr目标语种
  * @param {boolean} isCommandMode 是否显示命令模式的提示
  */
-function tipTextChange(translateLanguages = '自动', ocrLanguages = '自动检测', isCommandMode = false) {
+function tipTextChange (translateLanguages = '自动', ocrLanguages = '自动检测', isCommandMode = false) {
   target.innerText = `目标语言: ${translateLanguages} ocr语言: ${ocrLanguages} ${isCommandMode ? '<- 命令模式 ->' : ''}`
 }
