@@ -7,7 +7,7 @@ const AK_ocr = 'pwVtFCr7ep4KEmHkk6fQ1ru8'
 const SK_ocr = '1HXTzFafdlqxbFZAzDXnw2l74UkgQsN0'
 // 百度语音合成
 const AK_speech = 'nwMr7BIjxnntZRwOIaGhXPGD'
-const SK_speech = 'yljd0oILmqpCcsqnRcfYiLwjUuNtSMIG'
+const SK_speech = 'YtHTBY3gHd52q8jQnWIwsBsg9pcAkkRV'
 
 /**
  * 翻译api支持语种

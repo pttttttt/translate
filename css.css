@@ -39,6 +39,10 @@ input, div {
     font-weight: 100;
 }
 
+.speech .play {
+    margin-left: 222px;
+}
+
 .show-container {
     font-size: 14px;
 }

@@ -55,7 +55,7 @@ function _speechSynthesis (text) {
   return new Promise((res, rej) => {
     ajax.post('https://tsn.baidu.com/text2audio', {
       tex: encodeURIComponent(text),
-      tok: '24.7f01eee9711e7de8eb9fd38b6eded3db.2592000.1701095796.282335-41727336',
+      tok: tokens.speech.value,
       cuid: 'DC-21-48-F9-44-12',
       ctp: '1',
       lan: 'zh',
