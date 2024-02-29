@@ -16,7 +16,7 @@ const ajax = {
       script.src = `${url}&callback=${'callback'}`
       const timer = setTimeout(() => {
         rej({ code: 404, msg: '请求超时' })
-      }, config.timeout || 10000)
+      }, config.timeout || 5000)
       window['callback'] = data => {
         clearTimeout(timer)
         res(data)
@@ -35,29 +35,29 @@ function http (type, url, data, config, res, rej) {
   xhr.send(conversion(data))
   const timer = setTimeout(() => {
     xhr.abort()
-    rej({ code: 404, msg: '请求超时'})
-  }, config.timeout || 10000)
+    rej({ code: xhr.status, msg: '请求超时'})
+  }, config.timeout || 5000)
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       clearTimeout(timer)
       if (xhr.status === 200) {
         res(xhr.response)
+      } else if (xhr.status === 404) {
+        rej({ code: 404, msg: 'not found'})
       } else {
-        console.log(xhr)
-        rej({ code: 405, msg: '未知错误\n尝试检查参数是否有误\n或者使用-token命令更新鉴权'})
+        rej({ code: xhr.status, msg: '未知错误'})
       }
     }
   }
 }
 
 function conversion (data) {
-  if (data.constructor === Object) {
-    const fd = []
-    for (const key in data) {
-      fd.push(`${key}=${encodeURIComponent(data[key])}`)
-    }
-    return fd.join('&')
-  } else {
+  if (!data || data.constructor !== Object) {
     return data
   }
+  const fd = []
+  for (const key in data) {
+    fd.push(`${key}=${encodeURIComponent(data[key])}`)
+  }
+  return fd.join('&')
 }
