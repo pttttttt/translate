@@ -113,3 +113,23 @@ function _getToken ( apiKey, secretKey) {
       })
   })
 }
+
+/**
+ * 获取剪贴板变化的数据
+ * @returns promise
+ */
+function _getClipboardUpdate () {
+  return new Promise((res, rej) => {
+    ajax.get('http://127.0.0.1:3000/api/getClipboardUpdate')
+      .then(data => {
+        res(data)
+      }, err => {
+        dstChange('剪贴板内容获取失败')
+        rej(err)
+      })
+  })
+}
+
+// _getFileData('D:\\SteamLibrary\\steamapps\\workshop\\content\\431960').then(data => {
+//   console.log(data.data.length)
+// })

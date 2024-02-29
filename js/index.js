@@ -300,9 +300,9 @@ let keyEventHtml = '<div>快捷键<span>作用</span></div>'
 languages.forEach(v => {
   languagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
 })
-OCRLanguages.forEach(v => {
-  ocrLanguagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
-})
+// OCRLanguages.forEach(v => {
+//   ocrLanguagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
+// })
 command.forEach(v => {
   commandHtml += `<div>${v.code.join(' 或 ')}<span>${v.usageMethod}</span></div>`
 })
@@ -315,7 +315,7 @@ input.focus() // 打开网页时自动聚焦
 tipTextChange('自动', ocr)
 window.oncontextmenu = () => false // 禁用鼠标右键
 dst.addEventListener('mouseup', e => e.stopPropagation()) // 阻止鼠标在结果区域时的事件冒泡
-play.addEventListener('click', e => {
+play.addEventListener('click', e => { // 文本合成语音
   const text = dst.innerText.replace(/^\s*|\s*$/g, "")
   if (text === tmpText) {
     audio.play()
@@ -338,8 +338,24 @@ addEventListener('keyup', e => {
     if (keyEvent[i].key === e.key) keyEvent[i].fn(e)
   }
 })
+getClipboardUpdateHandler()
+setInterval(getClipboardUpdateHandler, 2000)
 
 // 回调函数
+
+/**
+ * 检查剪贴板数据是否发生变化
+ */
+function getClipboardUpdateHandler () {
+  _getClipboardUpdate().then(data => {
+    if (data.status === 0) {
+      input.value = data.str
+      _translateHanlder(data.str)
+    }
+  }, err => {
+    console.log(err)
+  })
+}
 
 /**
  * 执行命令
@@ -400,6 +416,10 @@ function _ocrHandler (languageType = 'auto_detect') {
       dstChange(`正在识别文件：${imgFilePath}`, 'white')
       _imgTextRecognition({ image: imageFile, language_type: languageType })
         .then(OCRResult => {
+          if (OCRResult.error_code) {
+            dstChange(`图片识别失败\ncode:${OCRResult.error_code}\nmsg:${OCRResult.error_msg}`)
+            return
+          }
           const resultArr = new Array()
           OCRResult.words_result.forEach(value => {
             resultArr.push(value.words)
