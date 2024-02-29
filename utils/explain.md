@@ -5,7 +5,7 @@
 
 ## api.exe
 将api.js通过打包软件打包成的可以在Windows系统下运行的exe文件
-*打包为exe使用的工具：pkg 使用教程[https://www.oschina.net/p/npmjs-pkg?hmsr=aladdin1e1]*
+*打包为exe使用的工具：pkg 官方文档[https://www.npmjs.com/package/pkg]*
 *可以下载nssm软件来将该exe文件封装成windows服务*
 *nssm教程以及下载地址[https://blog.csdn.net/liyou123456789/article/details/123094277]*
 
