@@ -1,3 +1,4 @@
+// pkg -t node16-win-x64 api.js
 const http = require('http')
 const fs = require('fs')
 const request = require('request')
