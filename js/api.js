@@ -1,3 +1,5 @@
+const port = 3001
+const basePath = 'http://127.0.0.1:' + port + '/api/'
 /**
  * 百度翻译 api
  * @param {string} query 需翻译的字符串
@@ -87,7 +89,7 @@ function _speechSynthesis (text) {
  */
 function _getFileData (path = 'C:\\Users\\86136\\Pictures\\Screenshots', original = false) {
   return new Promise((res, rej) => {
-    ajax.post('http://127.0.0.1:3000/api/getFileData', JSON.stringify({ path, original }))
+    ajax.post(basePath + 'getFileData', JSON.stringify({ path, original }))
       .then(data => {
         res(data)
       }, err => {
@@ -105,7 +107,7 @@ function _getFileData (path = 'C:\\Users\\86136\\Pictures\\Screenshots', origina
  */
 function _getToken ( apiKey, secretKey) {
   return new Promise((res, rej) => {
-    ajax.post('http://127.0.0.1:3000/api/getToken', JSON.stringify({ apiKey, secretKey }))
+    ajax.post(basePath + 'getToken', JSON.stringify({ apiKey, secretKey }))
       .then(data => {
         res(data)
       }, err => {
@@ -120,7 +122,7 @@ function _getToken ( apiKey, secretKey) {
  */
 function _getClipboardUpdate () {
   return new Promise((res, rej) => {
-    ajax.get('http://127.0.0.1:3000/api/getClipboardUpdate')
+    ajax.get(basePath + 'getClipboardUpdate')
       .then(data => {
         res(data)
       }, err => {

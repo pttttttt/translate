@@ -4,7 +4,7 @@ const fs = require('fs')
 const request = require('request')
 const ncp = require('copy-paste')
 
-const port = 3000
+const port = 3001
 let cacheStr = ''
 
 const server = http.createServer((req, res) => {

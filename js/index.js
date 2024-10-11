@@ -339,7 +339,7 @@ addEventListener('keyup', e => {
   }
 })
 getClipboardUpdateHandler()
-// setInterval(getClipboardUpdateHandler, 2000)
+setInterval(getClipboardUpdateHandler, 2000)
 
 // 回调函数
 

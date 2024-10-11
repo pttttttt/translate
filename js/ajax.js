@@ -1,4 +1,5 @@
 const ajax = {
+  basePath: '',
   get (url, data, config = {}) {
     return new Promise((res, rej) => {
       http('GET', url, data, config, res, rej)
@@ -29,7 +30,7 @@ const ajax = {
 
 function http (type, url, data, config, res, rej) {
   const xhr = new XMLHttpRequest()
-  xhr.open(type, url)
+  xhr.open(type, ajax.basePath + url)
   xhr.responseType = config.dataType || 'json'
   if (type === 'POST') xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
   xhr.send(conversion(data))
