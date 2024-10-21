@@ -347,6 +347,7 @@ setInterval(getClipboardUpdateHandler, 2000)
  * 检查剪贴板数据是否发生变化
  */
 function getClipboardUpdateHandler () {
+  if (document.hidden) return
   _getClipboardUpdate().then(data => {
     if (data.status === 0) {
       input.value = data.str
