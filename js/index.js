@@ -29,7 +29,7 @@ const command = [
     parameter: ['所有命令'],
     suffix: [],
     usageMethod: '查看所有命令',
-    fn ([commands, parameter, suffix]) {
+    fn([commands, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       if (!parameter) {
         addChild(commandHtml, 'table')
@@ -60,7 +60,7 @@ const command = [
     parameter: ['所有语种代码以及别称'],
     suffix: [],
     usageMethod: '-s 切换到自动模式\n\n-s [语种代码] 切换到指定语种',
-    fn ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       if (!parameter) {
         isAutoMode = true
@@ -88,7 +88,7 @@ const command = [
     parameter: ['所有语种代码以及别称'],
     suffix: [],
     usageMethod: '查看各个语种以及对应代码',
-    fn ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       dstChange("使用'-clear'或'-c'隐藏", 'white')
       if (!parameter) {
@@ -113,7 +113,7 @@ const command = [
     parameter: [],
     suffix: [],
     usageMethod: '清除已显示的提示信息',
-    fn ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
       container.innerHTML = ''
       input.value = ''
@@ -126,7 +126,7 @@ const command = [
     suffix: ['-'],
     url: ['https://fanyi.baidu.com/?aldtype=16047#auto/zh', 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', '../typing/index.html', '../typing/index.html'],
     usageMethod: '跳转至目标网页',
-    fn ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (parameter) {
         let url = this.url[this.parameter.indexOf(parameter)]
         if (!url) return dstChange(`执行失败\n命令 ${command} 中不支持参数：${parameter}`)
@@ -141,7 +141,7 @@ const command = [
     parameter: [],
     suffix: [],
     usageMethod: '切换命令模式和翻译模式',
-    fn ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
       modeChange()
     }
@@ -151,7 +151,7 @@ const command = [
     parameter: ['所有图片文本识别语种'],
     suffix: [],
     usageMethod: '切换图片文本识别语种',
-    fn ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       if (!parameter) {
         addChild(ocrLanguagesHtml, 'table')
@@ -172,15 +172,15 @@ const command = [
     parameter: ['ocr', 'speech'],
     suffix: [],
     usageMethod: '更新各个api的token',
-    fn  ([command, parameter, suffix]) {
+    fn([command, parameter, suffix]) {
       if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
       const tokenConfig = parameter ? tokens[parameter] : tokens.ocr
       if (!tokenConfig) return dstChange(`执行失败\n不支持参数:${parameter}\n使用命令：-help token 查看所有支持的参数`)
-      dstChange(`${tokenConfig.name} token(鉴权)更新中`, 'white')
+      dstChange(`${tokenConfig.name} token更新中`, 'white')
       _getToken(tokenConfig.ak, tokenConfig.sk).then(data => {
-        dstChange(`${tokenConfig.name} token(鉴权)更新成功\n新:${data}\n旧:${tokenConfig.value}`, 'white')
         localStorage.setItem(tokenConfig.key, data)
         tokenConfig.value = data
+        dstChange(`${tokenConfig.name} token更新成功\n新:${data}\n旧:${tokenConfig.value}`, 'white')
       })
     }
   }
@@ -193,7 +193,7 @@ const keyEvent = [
     key: 'Enter',
     combinationKey: 'enter',
     usageMethod: '翻译或者执行命令',
-    fn (e) {
+    fn(e) {
       query = input.value.replace(/^\s*|\s*$/g, "") // 去除输入文本前后的空格
       if (e.ctrlKey) { // 识别图片文本
         const [code] = queryKeyword(query, OCRLanguages)
@@ -215,7 +215,7 @@ const keyEvent = [
     key: 'Escape',
     combinationKey: 'escape',
     usageMethod: '清空输入框',
-    fn (e) {
+    fn(e) {
       input.value = ''
       input.focus()
     }
@@ -224,7 +224,7 @@ const keyEvent = [
     key: 'ArrowUp',
     combinationKey: 'arrowUp',
     usageMethod: '读取历史记录',
-    fn (e) {
+    fn(e) {
       if (e.ctrlKey || isCommandMode) readHistory(history.command, true)
       else if (e.altKey) readHistory(history.ocr, true)
       else readHistory(history.translate, true)
@@ -234,7 +234,7 @@ const keyEvent = [
     key: 'ArrowDown',
     combinationKey: 'arrowDown',
     usageMethod: '读取历史记录',
-    fn (e) {
+    fn(e) {
       if (e.ctrlKey || isCommandMode) readHistory(history.command, false)
       else if (e.altKey) readHistory(history.ocr, false)
       else readHistory(history.translate, false)
@@ -244,7 +244,7 @@ const keyEvent = [
     key: '\\',
     combinationKey: 'ctrl + \\',
     usageMethod: '拆分驼峰命名法的各个单词',
-    fn (e) {
+    fn(e) {
       if (e.ctrlKey) input.value = input.value.replace(/(?<!\s)([A-Z])/g, ' $1')
     }
   },
@@ -252,7 +252,7 @@ const keyEvent = [
     key: ' ',
     combinationKey: 'ctrl + space',
     usageMethod: '切换模式',
-    fn (e) {
+    fn(e) {
       if (e.ctrlKey) modeChange()
     }
   }
@@ -276,12 +276,12 @@ const history = {
     arr: [],
     dstText: []
   },
-  resetSubscript () {
+  resetSubscript() {
     this.translate.currentLocation = -1
     this.command.currentLocation = -1
     this.ocr.currentLocation = -1
   },
-  clearHistory (sign) {
+  clearHistory(sign) {
     if (sign) {
       this[sign].arr = []
     } else {
@@ -346,7 +346,7 @@ setInterval(getClipboardUpdateHandler, 2000)
 /**
  * 检查剪贴板数据是否发生变化
  */
-function getClipboardUpdateHandler () {
+function getClipboardUpdateHandler() {
   if (document.hidden) return
   _getClipboardUpdate().then(data => {
     if (data.status === 0) {
@@ -362,7 +362,7 @@ function getClipboardUpdateHandler () {
  * 执行命令
  * @param {string} query 输入的命令字符
  */
-function _executeCommandHandler (query) {
+function _executeCommandHandler(query) {
   addHistory(query, history.command) // 记录
   const strArr = query.split(/\s+/) // 以 命令 参数 后缀 分割字符串
   if (strArr.length > 3) return dstChange('执行失败\n命令格式错误！\n请使用以下格式：-[命令] [参数] [后缀]')
@@ -376,7 +376,7 @@ function _executeCommandHandler (query) {
  * 翻译处理程序
  * @param {string} query 输入的字符串
  */
-function _translateHanlder (query) {
+function _translateHanlder(query) {
   if (isAutoMode) to = /.*[\u4e00-\u9fa5]+.*$/.test(query) ? 'en' : 'zh' // 判断输入文本是否含有中文
   dstChange('正在翻译中', 'white')
   _translate(query, to).then(res => { // 翻译并处理翻译结果
@@ -401,7 +401,7 @@ function _translateHanlder (query) {
  * 图片文本识别
  * @param {string} languageType 待识别的语种
  */
-function _ocrHandler (languageType = 'auto_detect') {
+function _ocrHandler(languageType = 'auto_detect') {
   history.resetSubscript() // 重置历史记录下标位置
   dstChange('正在获取图片文件', 'white')
   _getFileData().then(data => {
@@ -439,7 +439,7 @@ function _ocrHandler (languageType = 'auto_detect') {
  * @param {array} arr 在此数组中查询
  * @returns 查询结果
  */
-function lookup (data, arr) {
+function lookup(data, arr) {
   let result = false
   arr.forEach(v => result = v.code === data ? v : result)
   return result
@@ -450,7 +450,7 @@ function lookup (data, arr) {
  * @param {string} text 需粘贴到剪贴板的字符串
  * @returns {boolean} 成功与否
  */
-function copyText (text) {
+function copyText(text) {
   let textarea = document.createElement("input")//创建input元素
   const currentFocus = document.activeElement//当前获得焦点的元素，保存一下
   document.body.appendChild(textarea)//添加元素
@@ -474,7 +474,7 @@ function copyText (text) {
  * @param {object} obj 在此对象中查询
  * @returns {array} 匹配结果
  */
-function queryKeyword (query, obj = languages) {
+function queryKeyword(query, obj = languages) {
   let result = null
   for (let i = 0; i < obj.length; i++) {
     const language = obj[i]
@@ -494,7 +494,7 @@ function queryKeyword (query, obj = languages) {
 /**
  * 切换模式
  */
-function modeChange () {
+function modeChange() {
   isCommandMode = !isCommandMode
   const result = lookup(to, languages)
   if (isCommandMode) target.innerText = '命令模式 输入-退出'
@@ -508,7 +508,7 @@ function modeChange () {
  * @param {string} html 子节点中的html代码
  * @param {string} myClass 该节点的类名
  */
-function addChild (html, myClass = 'item') {
+function addChild(html, myClass = 'item') {
   const div = document.createElement('div')
   div.classList.add(myClass)
   div.innerHTML = html
@@ -522,7 +522,7 @@ function addChild (html, myClass = 'item') {
  * @param {object} obj 存储目标对象
  * @param {string} dst dst 区域的值
  */
-function addHistory (str, obj, dst) {
+function addHistory(str, obj, dst) {
   const isRepeat = obj.arr.indexOf(str)
   isRepeat !== -1 && obj.arr.splice(isRepeat, 1)
   obj.arr.unshift(str)
@@ -537,7 +537,7 @@ function addHistory (str, obj, dst) {
  * @param {object} obj 读取目标对象
  * @param {boolean} judge 读取方向
  */
-function readHistory (obj, judge) {
+function readHistory(obj, judge) {
   if (judge) obj.currentLocation < obj.arr.length - 1 && obj.currentLocation++
   else obj.currentLocation > 0 && obj.currentLocation--
   obj.currentLocation >= 0 && (input.value = obj.arr[obj.currentLocation])
@@ -549,7 +549,7 @@ function readHistory (obj, judge) {
  * @param {string} text 文本
  * @param {string} color 文本颜色
  */
-function dstChange (text = 'error', color = 'red') {
+function dstChange(text = 'error', color = 'red') {
   dst.style.color = color
   dst.innerText = text
 }
@@ -560,6 +560,6 @@ function dstChange (text = 'error', color = 'red') {
  * @param {string} ocrLanguages ocr目标语种
  * @param {boolean} isCommandMode 是否显示命令模式的提示
  */
-function tipTextChange (translateLanguages = '自动', ocrLanguages = '自动检测', isCommandMode = false) {
+function tipTextChange(translateLanguages = '自动', ocrLanguages = '自动检测', isCommandMode = false) {
   target.innerText = `目标语言: ${translateLanguages} ocr语言: ${ocrLanguages} ${isCommandMode ? '<- 命令模式 ->' : ''}`
 }

@@ -6,7 +6,7 @@ const basePath = 'http://127.0.0.1:' + port + '/api/'
  * @param {string} to 目标语种代码
  * @returns promise
  */
-function _translate (query, to) {
+function _translate(query, to) {
   str1 = appid + query + salt + key
   sign = MD5(str1)
   return new Promise((res, rej) => {
@@ -18,14 +18,14 @@ function _translate (query, to) {
       to: to,
       sign: sign
     },
-    {
-      timeout: 5000
-    }).then(data => {
-      res(data)
-    }, err => {
-      dstChange(err.msg)
-      rej(err)
-    })
+      {
+        timeout: 5000
+      }).then(data => {
+        res(data)
+      }, err => {
+        dstChange(err.msg)
+        rej(err)
+      })
   })
 }
 
@@ -36,7 +36,7 @@ function _translate (query, to) {
  * @param {boolean} isNeedPosition 是否需要位置信息
  * @returns promise
  */
-function _imgTextRecognition (data, isNeedHighPrecision = true, isNeedPosition = false) {
+function _imgTextRecognition(data, isNeedHighPrecision = true, isNeedPosition = false) {
   return new Promise((res, rej) => {
     ajax.post(`https://aip.baidubce.com/rest/2.0/ocr/v1/${isNeedHighPrecision ? 'accurate' : 'general'}${isNeedPosition ? '' : '_basic'}?access_token=${tokens.ocr.value}`, data, { timeout: 5000 })
       .then(data => {
@@ -53,7 +53,7 @@ function _imgTextRecognition (data, isNeedHighPrecision = true, isNeedPosition =
  * @param {string} text 需合成语音的文本
  * @returns 
  */
-function _speechSynthesis (text) {
+function _speechSynthesis(text) {
   return new Promise((res, rej) => {
     ajax.post('https://tsn.baidu.com/text2audio', {
       tex: encodeURIComponent(text),
@@ -67,18 +67,18 @@ function _speechSynthesis (text) {
       per: '0', // 度小宇=1，度小美=0，度逍遥（基础）=3，度丫丫=4
       aue: '3'
     },
-    {
-      timeout: 5000,
-      dataType: 'blob'
-    }).then(data => {
-      if (data.type !== 'audio/mp3') {
-        dstChange('语音合成失败,尝试使用命令 -token speech 更新鉴权')
-        return
-      }
-      res(data)
-    }, err => {
-      dstChange(err.msg)
-    })
+      {
+        timeout: 5000,
+        dataType: 'blob'
+      }).then(data => {
+        if (data.type !== 'audio/mp3') {
+          dstChange('语音合成失败,尝试使用命令 -token speech 更新鉴权')
+          return
+        }
+        res(data)
+      }, err => {
+        dstChange(err.msg)
+      })
   })
 }
 
@@ -87,7 +87,7 @@ function _speechSynthesis (text) {
  * @param {string} path 绝对路径
  * @param {boolean} original 是否需要原始数据 选择false的话就返回base64转码后的数据
  */
-function _getFileData (path = 'C:\\Users\\86136\\Pictures\\Screenshots', original = false) {
+function _getFileData(path = 'C:\\Users\\86136\\Pictures\\Screenshots', original = false) {
   return new Promise((res, rej) => {
     ajax.post(basePath + 'getFileData', JSON.stringify({ path, original }))
       .then(data => {
@@ -105,7 +105,7 @@ function _getFileData (path = 'C:\\Users\\86136\\Pictures\\Screenshots', origina
  * @param {string} secretKey 
  * @returns promise
  */
-function _getToken ( apiKey, secretKey) {
+function _getToken(apiKey, secretKey) {
   return new Promise((res, rej) => {
     ajax.post(basePath + 'getToken', JSON.stringify({ apiKey, secretKey }))
       .then(data => {
@@ -120,7 +120,7 @@ function _getToken ( apiKey, secretKey) {
  * 获取剪贴板变化的数据
  * @returns promise
  */
-function _getClipboardUpdate () {
+function _getClipboardUpdate() {
   return new Promise((res, rej) => {
     ajax.get(basePath + 'getClipboardUpdate')
       .then(data => {
