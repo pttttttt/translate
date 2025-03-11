@@ -20,6 +20,22 @@ const audio = new Audio()
 
 // 配置对象
 
+// 命令执行失败提示文本模版
+const errorText = {
+  notParam: '执行失败\n该命令不支持参数',
+  notSuffix: '执行失败\n该命令不支持后缀',
+  misParam(command, param) {
+    return `执行失败\n命令 ${command} 中，不支持参数：${param}`
+  },
+  misSuffix(command, suffix) {
+    return `执行失败\n命令 ${command} 中，不支持后缀：${suffix}`
+  },
+}
+// 其他提示文本
+const tipText = {
+  clearTip: '使用 -clear 或 -c 隐藏',
+  initTip: '按下回车键翻译或执行命令 \r使用 -hlep 查看所有命令',
+}
 /**
  * 命令配置对象
  */
@@ -27,16 +43,18 @@ const command = [
   {
     code: ['-help', '-h'],
     parameter: ['所有命令'],
-    suffix: [],
+    suffix: false,
     usageMethod: '查看所有命令',
-    fn([commands, parameter, suffix]) {
-      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
+    check([command, parameter, suffix]) {
       if (!parameter) {
         addChild(commandHtml, 'table')
         input.value = ''
         dstChange("使用 -clear 或 -c 隐藏\n所有命令均以 - 开头", 'white')
-        return
+        return false
       }
+      return parameter
+    },
+    run(parameter) {
       parameter[0] !== '-' && (parameter = '-' + parameter)
       let html
       command.forEach(value => {
@@ -58,20 +76,25 @@ const command = [
   {
     code: ['-switch', '-s'],
     parameter: ['所有语种代码以及别称'],
-    suffix: [],
+    suffix: false,
     usageMethod: '-s 切换到自动模式\n\n-s [语种代码] 切换到指定语种',
-    fn([command, parameter, suffix]) {
-      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
+    check([command, parameter, suffix]) {
       if (!parameter) {
         isAutoMode = true
         tipTextChange('自动')
         input.value = ''
         dstChange('已恢复为自动', 'white')
-        return
+        return false
       }
-      dstChange('正在切换中', 'white')
       const [tmpTo] = queryKeyword(parameter)
-      if (!tmpTo) return dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${parameter}`)
+      if (!tmpTo) {
+        dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${parameter}`)
+        return false
+      }
+      return tmpTo
+    },
+    run(tmpTo) {
+      dstChange('正在切换中', 'white')
       _translate('苹果', tmpTo).then(res => {
         if (!res.trans_result) return dstChange(`切换失败 \n未从支持的语种库中找到目标语种: ${tmpTo}`)
         let result = lookup(tmpTo, languages)
@@ -86,19 +109,24 @@ const command = [
   {
     code: ['-check', '-ck'],
     parameter: ['所有语种代码以及别称'],
-    suffix: [],
+    suffix: false,
     usageMethod: '查看各个语种以及对应代码',
-    fn([command, parameter, suffix]) {
-      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
-      dstChange("使用'-clear'或'-c'隐藏", 'white')
+    check([command, parameter, suffix]) {
       if (!parameter) {
         addChild(languagesHtml, 'table')
         input.value = ''
-        return
+        return false
       }
       const result = lookup(queryKeyword(parameter)[0], languages)
-      if (!result) return dstChange(`执行失败\n未从支持语种中找语种: ${parameter}`)
-      let html = `<span>${parameter}</span>
+      if (!result) {
+        dstChange(`执行失败\n未从支持语种中找语种: ${parameter}`)
+        return false
+      }
+      return result
+    },
+    run(result, [command, parameter, suffix]) {
+      dstChange(tipText.clearTip, 'white')
+      const html = `<span>${parameter}</span>
                 <ul>
                   <li><span>语种</span><span>${result.name}</span></li>
                   <li><span>代码</span><span>${result.code}</span></li>
@@ -110,57 +138,78 @@ const command = [
   },
   {
     code: ['-clear', '-c'],
-    parameter: [],
-    suffix: [],
+    parameter: false,
+    suffix: false,
     usageMethod: '清除已显示的提示信息',
-    fn([command, parameter, suffix]) {
-      if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
+    check() {
+      return true
+    },
+    run() {
       container.innerHTML = ''
       input.value = ''
-      dstChange('按下回车键翻译或执行命令 \r使用 -hlep 查看所有命令', 'white')
+      dstChange(tipText.initTip, 'white')
     }
   },
   {
     code: ['-open', '-o'],
     parameter: ['fanyi', 'f', 'typing', 't'],
     suffix: ['-'],
+    defUrl: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh',
     url: ['https://fanyi.baidu.com/?aldtype=16047#auto/zh', 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', '../typing/index.html', '../typing/index.html'],
     usageMethod: '跳转至目标网页',
-    fn([command, parameter, suffix]) {
-      if (parameter) {
-        let url = this.url[this.parameter.indexOf(parameter)]
-        if (!url) return dstChange(`执行失败\n命令 ${command} 中不支持参数：${parameter}`)
-        if (this.suffix.indexOf(suffix) + 1) window.location.href = url
-        else if (suffix && suffix !== '') dstChange(`执行失败\n命令 ${command} 中，不支持后缀：${suffix}`)
-        else window.open(url)
-      } else window.open('https://fanyi.baidu.com/?aldtype=16047#auto/zh')
+    check([command, parameter, suffix]) {
+      let url = this.defUrl, judge = false
+      if (!parameter) return [url, judge]
+      url = this.url[this.parameter.indexOf(parameter)]
+      if (!url) {
+        dstChange(errorText.misParam(command, parameter))
+        return false
+      }
+      if (suffix) {
+        if (this.suffix.indexOf(suffix) === -1) {
+          dstChange(errorText.misSuffix(command, suffix))
+          return false
+        }
+        judge = true
+      }
+      return [url, judge]
+    },
+    run([url, judge]) {
+      window.open(url, judge ? '_blank' : '_self')
     }
   },
   {
     code: ['-'],
-    parameter: [],
-    suffix: [],
+    parameter: false,
+    suffix: false,
     usageMethod: '切换命令模式和翻译模式',
-    fn([command, parameter, suffix]) {
-      if (parameter && parameter !== 0) return dstChange('执行失败\n该命令不支持参数')
+    check() {
+      return true
+    },
+    run() {
       modeChange()
     }
   },
   {
     code: ['-type', '-t'],
     parameter: ['所有图片文本识别语种'],
-    suffix: [],
+    suffix: false,
     usageMethod: '切换图片文本识别语种',
-    fn([command, parameter, suffix]) {
-      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
+    check([command, parameter, suffix]) {
       if (!parameter) {
         addChild(ocrLanguagesHtml, 'table')
-        dstChange("使用'-clear'或'-c'隐藏", 'white')
+        dstChange(tipText.clearTip, 'white')
         input.value = ''
-        return
+        return false
       }
       const [code, resultObj] = queryKeyword(parameter, OCRLanguages)
-      if (!code) return dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-hlep type 以查看所有支持的语种`)
+      if (!code) {
+        dstChange(`未从支持的语种库中找到该语种：${parameter}\n使用命令：-hlep type 以查看所有支持的语种`)
+        return false
+      }
+      return resultObj
+    },
+    run(resultObj) {
       ocr = resultObj.name
       dstChange('切换ocr语种成功', 'white')
       tipTextChange(to, ocr, isCommandMode)
@@ -170,12 +219,17 @@ const command = [
   {
     code: ['-token', '-tk'],
     parameter: ['ocr', 'speech'],
-    suffix: [],
+    suffix: false,
     usageMethod: '更新各个api的token',
-    fn([command, parameter, suffix]) {
-      if (suffix && suffix !== 0) return dstChange('执行失败\n该命令不支持后缀')
+    check([command, parameter, suffix]) {
       const tokenConfig = parameter ? tokens[parameter] : tokens.ocr
-      if (!tokenConfig) return dstChange(`执行失败\n不支持参数:${parameter}\n使用命令：-help token 查看所有支持的参数`)
+      if (!tokenConfig) {
+        dstChange(errorText.misParam(command, parameter) + '\n使用命令：-help token 查看所有支持的参数')
+        return false
+      }
+      return tokenConfig
+    },
+    run(tokenConfig) {
       dstChange(`${tokenConfig.name} token更新中`, 'white')
       _getToken(tokenConfig.ak, tokenConfig.sk).then(data => {
         localStorage.setItem(tokenConfig.key, data)
@@ -300,9 +354,9 @@ let keyEventHtml = '<div>快捷键<span>作用</span></div>'
 languages.forEach(v => {
   languagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
 })
-// OCRLanguages.forEach(v => {
-//   ocrLanguagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
-// })
+OCRLanguages.forEach(v => {
+  ocrLanguagesHtml += `<div>${v.code}<span>${v.name}</span></div>`
+})
 command.forEach(v => {
   commandHtml += `<div>${v.code.join(' 或 ')}<span>${v.usageMethod}</span></div>`
 })
@@ -367,7 +421,20 @@ function _executeCommandHandler(query) {
   const strArr = query.split(/\s+/) // 以 命令 参数 后缀 分割字符串
   if (strArr.length > 3) return dstChange('执行失败\n命令格式错误！\n请使用以下格式：-[命令] [参数] [后缀]')
   for (let i = 0, n = command.length; i < n; i++) {
-    if (command[i].code.indexOf(strArr[0]) !== -1) return command[i].fn(strArr)
+    if (command[i].code.indexOf(strArr[0]) !== -1) {
+      const target = command[i]
+      if (strArr.length > 1 && target.parameter === false) {
+        dstChange(errorText.notParam)
+        return
+      }
+      if (strArr.length > 2 && target.suffix === false) {
+        dstChange(errorText.notSuffix)
+        return
+      }
+      const res = command[i].check(strArr)
+      res && command[i].run(res, strArr)
+      return
+    }
   }
   dstChange(`执行失败 \n命令不存在: ${strArr[0]} \n输入-h查看所有命令`)
 }
