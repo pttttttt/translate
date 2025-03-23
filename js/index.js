@@ -233,8 +233,8 @@ const command = [
       dstChange(`${tokenConfig.name} token更新中`, 'white')
       _getToken(tokenConfig.ak, tokenConfig.sk).then(data => {
         localStorage.setItem(tokenConfig.key, data)
-        tokenConfig.value = data
         dstChange(`${tokenConfig.name} token更新成功\n新:${data}\n旧:${tokenConfig.value}`, 'white')
+        tokenConfig.value = data
       })
     }
   }
@@ -392,6 +392,7 @@ addEventListener('keyup', e => {
     if (keyEvent[i].key === e.key) keyEvent[i].fn(e)
   }
 })
+let errorTip = true
 getClipboardUpdateHandler()
 setInterval(getClipboardUpdateHandler, 2000)
 
@@ -402,12 +403,14 @@ setInterval(getClipboardUpdateHandler, 2000)
  */
 function getClipboardUpdateHandler() {
   if (document.hidden) return
-  _getClipboardUpdate().then(data => {
+  _getClipboardUpdate(errorTip).then(data => {
     if (data.status === 0) {
+      errorTip = true
       input.value = data.str
       _translateHanlder(data.str)
     }
   }, err => {
+    errorTip = false
     console.log(err)
   })
 }

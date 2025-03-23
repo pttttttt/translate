@@ -120,13 +120,13 @@ function _getToken(apiKey, secretKey) {
  * 获取剪贴板变化的数据
  * @returns promise
  */
-function _getClipboardUpdate() {
+function _getClipboardUpdate(errorTip = true) {
   return new Promise((res, rej) => {
     ajax.get(basePath + 'getClipboardUpdate')
       .then(data => {
         res(data)
       }, err => {
-        dstChange('剪贴板内容获取失败')
+        if (errorTip) dstChange('剪贴板内容获取失败')
         rej(err)
       })
   })
