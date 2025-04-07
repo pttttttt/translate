@@ -14,7 +14,7 @@ const ajax = {
     return new Promise((res, rej) => {
       url = url + '?' + conversion(data)
       const script = document.createElement('script')
-      script.src = `${url}&callback=${'callback'}`
+      script.src = `${url}&callback=callback`
       const timer = setTimeout(() => {
         rej({ code: 404, msg: '请求超时' })
       }, config.timeout || 5000)

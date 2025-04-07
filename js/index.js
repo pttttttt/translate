@@ -34,7 +34,7 @@ const errorText = {
 // 其他提示文本
 const tipText = {
   clearTip: '使用 -clear 或 -c 隐藏',
-  initTip: '按下回车键翻译或执行命令 \r使用 -hlep 查看所有命令',
+  initTip: '按下回车键翻译或执行命令 \r使用 -help 查看所有命令',
 }
 /**
  * 命令配置对象
@@ -204,7 +204,7 @@ const command = [
       }
       const [code, resultObj] = queryKeyword(parameter, OCRLanguages)
       if (!code) {
-        dstChange(`未从支持的语种库中找到该语种：${parameter}\n使用命令：-hlep type 以查看所有支持的语种`)
+        dstChange(`未从支持的语种库中找到该语种：${parameter}\n使用命令：-help type 以查看所有支持的语种`)
         return false
       }
       return resultObj
@@ -251,7 +251,7 @@ const keyEvent = [
       query = input.value.replace(/^\s*|\s*$/g, "") // 去除输入文本前后的空格
       if (e.ctrlKey) { // 识别图片文本
         const [code] = queryKeyword(query, OCRLanguages)
-        if (!code) return dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-hlep type 以查看所有支持的语种`)
+        if (!code) return dstChange(`未从支持的语种库中找到该语种：${query}\n使用命令：-help type 以查看所有支持的语种`)
         _ocrHandler(code && ocr)
         return
       }
@@ -261,7 +261,7 @@ const keyEvent = [
       if (isCommandMode || query[0] === '-') { // 执行命令
         _executeCommandHandler(query)
       } else { // 翻译
-        _translateHanlder(query)
+        _translateHandler(query)
       }
     }
   },
@@ -407,7 +407,7 @@ function getClipboardUpdateHandler() {
     if (data.status === 0) {
       errorTip = true
       input.value = data.str
-      _translateHanlder(data.str)
+      _translateHandler(data.str)
     }
   }, err => {
     errorTip = false
@@ -446,7 +446,7 @@ function _executeCommandHandler(query) {
  * 翻译处理程序
  * @param {string} query 输入的字符串
  */
-function _translateHanlder(query) {
+function _translateHandler(query) {
   if (isAutoMode) to = /.*[\u4e00-\u9fa5]+.*$/.test(query) ? 'en' : 'zh' // 判断输入文本是否含有中文
   dstChange('正在翻译中', 'white')
   _translate(query, to).then(res => { // 翻译并处理翻译结果
@@ -491,7 +491,7 @@ function _ocrHandler(languageType = 'auto_detect') {
             dstChange(`图片识别失败\ncode:${OCRResult.error_code}\nmsg:${OCRResult.error_msg}`)
             return
           }
-          const resultArr = new Array()
+          const resultArr = []
           OCRResult.words_result.forEach(value => {
             resultArr.push(value.words)
           })
@@ -528,10 +528,11 @@ function copyText(text) {
   textarea.focus()
   textarea.setSelectionRange(0, textarea.value.length)//获取光标起始位置到结束位置
   //textarea.select(); 这个是直接选中所有的，效果和上面一样
+  let flag = true
   try {
-    var flag = document.execCommand("copy")//执行复制
+    flag = document.execCommand("copy")//执行复制
   } catch (eo) {
-    var flag = false
+    flag = false
   }
   document.body.removeChild(textarea)//删除元素
   currentFocus.focus() //恢复焦点
