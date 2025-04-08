@@ -45,7 +45,7 @@ const command = [
     parameter: ['所有命令'],
     suffix: false,
     usageMethod: '查看所有命令',
-    check([command, parameter, suffix]) {
+    check([, parameter]) {
       if (!parameter) {
         addChild(commandHtml, 'table')
         input.value = ''
@@ -78,7 +78,7 @@ const command = [
     parameter: ['所有语种代码以及别称'],
     suffix: false,
     usageMethod: '-s 切换到自动模式\n\n-s [语种代码] 切换到指定语种',
-    check([command, parameter, suffix]) {
+    check([, parameter]) {
       if (!parameter) {
         isAutoMode = true
         tipTextChange('自动')
@@ -111,7 +111,7 @@ const command = [
     parameter: ['所有语种代码以及别称'],
     suffix: false,
     usageMethod: '查看各个语种以及对应代码',
-    check([command, parameter, suffix]) {
+    check([, parameter]) {
       if (!parameter) {
         addChild(languagesHtml, 'table')
         input.value = ''
@@ -124,7 +124,7 @@ const command = [
       }
       return result
     },
-    run(result, [command, parameter, suffix]) {
+    run(result, [, parameter]) {
       dstChange(tipText.clearTip, 'white')
       const html = `<span>${parameter}</span>
                 <ul>
@@ -154,13 +154,31 @@ const command = [
     code: ['-open', '-o'],
     parameter: ['fanyi', 'f', 'typing', 't'],
     suffix: ['-'],
-    defUrl: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh',
-    url: ['https://fanyi.baidu.com/?aldtype=16047#auto/zh', 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', '../typing/index.html', '../typing/index.html'],
+    urlData: {
+      translateUrl: 'https://cn.bing.com/translator?ref=TThis&text=&from=en&to=zh-Hans',
+      typingUrl: '../typing/index.html',
+      get defUrl () {
+        return this.translateUrl
+      },
+      get fanyi () {
+        return this.translateUrl
+      },
+      get f () {
+        return this.translateUrl
+      },
+      get typing () {
+        return this.typingUrl
+      },
+      get t () {
+        return this.typingUrl
+      },
+    },
     usageMethod: '跳转至目标网页',
     check([command, parameter, suffix]) {
-      let url = this.defUrl, judge = false
+      const urlData = this.urlData
+      let url = urlData.defUrl, judge = false
       if (!parameter) return [url, judge]
-      url = this.url[this.parameter.indexOf(parameter)]
+      url = urlData[parameter]
       if (!url) {
         dstChange(errorText.misParam(command, parameter))
         return false
@@ -195,7 +213,7 @@ const command = [
     parameter: ['所有图片文本识别语种'],
     suffix: false,
     usageMethod: '切换图片文本识别语种',
-    check([command, parameter, suffix]) {
+    check([, parameter]) {
       if (!parameter) {
         addChild(ocrLanguagesHtml, 'table')
         dstChange(tipText.clearTip, 'white')
@@ -221,7 +239,7 @@ const command = [
     parameter: ['ocr', 'speech'],
     suffix: false,
     usageMethod: '更新各个api的token',
-    check([command, parameter, suffix]) {
+    check([command, parameter]) {
       const tokenConfig = parameter ? tokens[parameter] : tokens.ocr
       if (!tokenConfig) {
         dstChange(errorText.misParam(command, parameter) + '\n使用命令：-help token 查看所有支持的参数')
@@ -269,7 +287,7 @@ const keyEvent = [
     key: 'Escape',
     combinationKey: 'escape',
     usageMethod: '清空输入框',
-    fn(e) {
+    fn() {
       input.value = ''
       input.focus()
     }
@@ -369,7 +387,7 @@ input.focus() // 打开网页时自动聚焦
 tipTextChange('自动', ocr)
 window.oncontextmenu = () => false // 禁用鼠标右键
 dst.addEventListener('mouseup', e => e.stopPropagation()) // 阻止鼠标在结果区域时的事件冒泡
-play.addEventListener('click', e => { // 文本合成语音
+play.addEventListener('click', () => { // 文本合成语音
   const text = dst.innerText.replace(/^\s*|\s*$/g, "")
   if (text === tmpText) {
     audio.play()
@@ -389,7 +407,7 @@ addEventListener('mouseup', e => {
 })
 addEventListener('keyup', e => {
   for (let i = 0, n = keyEvent.length; i < n; i++) {
-    if (keyEvent[i].key === e.key) keyEvent[i].fn(e)
+    if (keyEvent[i].key === e.key) keyEvent[i].fn()
   }
 })
 let errorTip = true
@@ -480,7 +498,7 @@ function _ocrHandler(languageType = 'auto_detect') {
     if (imgFileNameList.length === 0) return dstChange('该文件夹没有找到合适格式的图片')
     const imgFilePath = data.path + '\\' + imgFileNameList.pop()
     input.value = imgFilePath
-    addChild(`<img src="${imgFilePath}"/>`, 'img')
+    addChild(`<img src="${imgFilePath}" alt="加载失败"/>`, 'img')
     _getFileData(imgFilePath).then(data => {
       if (data.code !== 200) return dstChange(data.msg)
       const imageFile = data.data
@@ -528,7 +546,7 @@ function copyText(text) {
   textarea.focus()
   textarea.setSelectionRange(0, textarea.value.length)//获取光标起始位置到结束位置
   //textarea.select(); 这个是直接选中所有的，效果和上面一样
-  let flag = true
+  let flag
   try {
     flag = document.execCommand("copy")//执行复制
   } catch (eo) {
@@ -593,7 +611,7 @@ function addChild(html, myClass = 'item') {
  * @param {object} obj 存储目标对象
  * @param {string} dst dst 区域的值
  */
-function addHistory(str, obj, dst) {
+function addHistory(str, obj, dst = '') {
   const isRepeat = obj.arr.indexOf(str)
   isRepeat !== -1 && obj.arr.splice(isRepeat, 1)
   obj.arr.unshift(str)
