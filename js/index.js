@@ -867,6 +867,6 @@ function tipTextChange() {
  * 判断字符串有无命令前缀
  * @param {string} str 待判断的字符串
  */
-function hasPrefix(str) {
+function hasPrefix(str) { 
   return str.startsWith(PREFIX);
 }
