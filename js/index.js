@@ -208,10 +208,10 @@ const command = {
       }
     },
     {
-      code: ['clear', 'c'],
+      code: ['clear', 'c', 'cls'],
       parameter: false,
       suffix: false,
-      usageMethod: '清除已显示的提示信息',
+      usageMethod: '恢复页面数据至初始状态',
       check() {
         return true
       },
@@ -867,6 +867,6 @@ function tipTextChange() {
  * 判断字符串有无命令前缀
  * @param {string} str 待判断的字符串
  */
-function hasPrefix(str) { 
+function hasPrefix(str) {
   return str.startsWith(PREFIX);
 }
