@@ -591,7 +591,7 @@ const history = {
     this.ocr.currentLocation = -1
   },
   /**
-   * 清楚指定历史记录
+   * 清空指定类型历史记录
    * @param {string} sign 清除目标
    */
   clearHistory(sign) {
@@ -747,33 +747,32 @@ function _translateHandler(query) {
  */
 function _ocrHandler() {
   history.resetSubscript() // 重置历史记录下标位置
+  let imgFilePath = ''
   dstChange('正在获取图片文件', 'white')
-  Api.getFileData().then(data => {
+  Api.getFileData().then(data => { // 从截图文件夹中找出最后一张图片
     if (data.code !== 200) return dstChange(data.msg)
     const imgFileNameList = data.data.filter(fileName => fileName.match(/\.(jpg|jpeg|png|bmp)$/))
     if (imgFileNameList.length === 0) return dstChange('该文件夹没有找到合适格式的图片')
-    const imgFilePath = data.path + '\\' + imgFileNameList.pop()
+    imgFilePath = data.path + '\\' + imgFileNameList.pop()
     input.value = imgFilePath
     addChild(`<img src="${imgFilePath}" alt="加载失败"/>`, 'img')
-    Api.getFileData(imgFilePath).then(data => {
-      if (data.code !== 200) return dstChange(data.msg)
-      const imageFile = data.data
-      dstChange(`正在识别文件：${imgFilePath}`, 'white')
-      Api.imgTextRecognition({ image: imageFile, language_type: controller.ocr })
-        .then(OCRResult => {
-          if (OCRResult.error_code) {
-            dstChange(`图片识别失败\ncode:${OCRResult.error_code}\nmsg:${OCRResult.error_msg}`)
-            return
-          }
-          const resultArr = []
-          OCRResult.words_result.forEach(value => {
-            resultArr.push(value.words)
-          })
-          const resultStr = resultArr.join('\n')
-          dstChange(resultStr, 'white')
-          history.add(imgFilePath, 'ocr', resultStr) // 记录
-        })
+    return Api.getFileData(imgFilePath)
+  }).then(data => { // 获取图片二进制信息
+    if (data.code !== 200) return dstChange(data.msg)
+    dstChange(`正在识别文件：${imgFilePath}`, 'white')
+    return Api.imgTextRecognition({ image: data.data, language_type: controller.ocr })
+  }).then(OCRResult => { // 调用百度ocr进行识别
+    if (OCRResult.error_code) {
+      dstChange(`图片识别失败\ncode:${OCRResult.error_code}\nmsg:${OCRResult.error_msg}`)
+      return
+    }
+    const resultArr = []
+    OCRResult.words_result.forEach(value => {
+      resultArr.push(value.words)
     })
+    const resultStr = resultArr.join('\n')
+    dstChange(resultStr, 'white')
+    history.add(imgFilePath, 'ocr', resultStr) // 记录
   })
 }
 
