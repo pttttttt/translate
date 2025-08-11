@@ -440,8 +440,7 @@ const command = {
    */
   silentExecute(command) {
     const strArr = this._splitCommand(command)
-    const suffix = strArr[strArr.length - 1]
-    if (suffix === PREFIX) return false // 输入后缀为命令前缀时 不执行命令
+    if (strArr[strArr.length - 1] === PREFIX) return false // 输入后缀为命令前缀时 不执行命令
     const target = this.commandMap[strArr[0]]
     if (!target) return false
     if (strArr.length > 1 && target.parameter === false) return false
@@ -704,7 +703,7 @@ function getClipboardUpdateHandler() {
   if (document.hidden) return
   Api.getClipboardUpdate(errorTip).then(data => {
     if (data.status === 0) {
-      const str = data.str
+      const str = data.str.replace(/[\r\n]+/g, " ")
       errorTip = true
       input.value = str
       if (str.match(/(https?:\/\/[^\s]+)|(([a-zA-Z]:)?[\\/][\w\-\.\\\/ ]+)/g)) return
